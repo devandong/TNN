@@ -58,7 +58,7 @@ using namespace std;
     } else if (indexPath.section == 2){
         vc = [self.storyboard instantiateViewControllerWithIdentifier:@"TNNImageColourController"];
     } else if (indexPath.section == 3) {
-           vc = [self.storyboard instantiateViewControllerWithIdentifier:@"TNNBlazefaceDetectorController"];
+        vc = [self.storyboard instantiateViewControllerWithIdentifier:@"TNNBlazefaceDetectorController"];
     } else if (indexPath.section == 4){
         vc = [self.storyboard instantiateViewControllerWithIdentifier:@"TNNCameraPreviewController"];
         auto cameraViewController = (TNNCameraPreviewController*)vc;
@@ -87,6 +87,8 @@ using namespace std;
         cameraViewController.viewModel = [TNNFaceDetectMeshViewModel new];
         cameraViewController.viewModel.title = @"Facemesh";
         cameraViewController.viewModel.preferFrontCamera = true;
+    } else if (indexPath.section == 9) {
+        vc = [self.storyboard instantiateViewControllerWithIdentifier:@"TNNYoutuFaceAlignController"];
     }
     if (!vc) {
         return;

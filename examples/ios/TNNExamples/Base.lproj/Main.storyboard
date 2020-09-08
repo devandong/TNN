@@ -665,6 +665,39 @@
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
+                            <tableViewSection id="iLb-2V-kb6">
+                                <cells>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" rowHeight="80" id="le7-J5-v8e">
+                                        <rect key="frame" x="0.0" y="1252" width="375" height="80"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="le7-J5-v8e" id="6h1-qU-hGx">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="80"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="测试demo" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1p0-ip-NzO" userLabel="解码图像">
+                                                    <rect key="frame" x="21" y="15" width="94" height="21"/>
+                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="图像序列输入" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aql-MP-i17" userLabel="图像序列输入">
+                                                    <rect key="frame" x="20" y="43.666666666666664" width="104" height="20.999999999999993"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="aql-MP-i17" firstAttribute="leading" secondItem="6h1-qU-hGx" secondAttribute="leading" constant="20" id="0lE-Xq-UZD"/>
+                                                <constraint firstItem="1p0-ip-NzO" firstAttribute="top" secondItem="6h1-qU-hGx" secondAttribute="top" constant="15" id="BDf-Co-8Jk"/>
+                                                <constraint firstItem="1p0-ip-NzO" firstAttribute="leading" secondItem="6h1-qU-hGx" secondAttribute="leading" constant="20" id="M0r-8k-Pud"/>
+                                                <constraint firstItem="aql-MP-i17" firstAttribute="top" secondItem="1p0-ip-NzO" secondAttribute="bottom" constant="7.5" id="QC1-W1-sl4"/>
+                                                <constraint firstAttribute="bottom" secondItem="aql-MP-i17" secondAttribute="bottom" priority="250" constant="15.5" id="lal-gR-2or"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </cells>
+                            </tableViewSection>
                         </sections>
                         <connections>
                             <outlet property="dataSource" destination="jDT-gM-iHE" id="ggX-Ye-BF7"/>
@@ -1122,7 +1155,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="ZB4-bX-xVl"/>
+        <segue reference="0f6-Kd-cf5"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="camera_rotate_fill.png" width="200" height="200"/>

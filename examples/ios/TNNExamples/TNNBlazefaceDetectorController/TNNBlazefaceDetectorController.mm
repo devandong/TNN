@@ -164,12 +164,12 @@ using namespace TNN_NS;
     auto input_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, target_dims);
 #if PROFILE
     timer.start();
-    status = predictor->Resize(image_mat, input_mat, TNNInterpNearest);
+    status = predictor->Resize(image_mat, input_mat, TNNInterpLinear);
     timer.printElapsed(tag, "Resize");
     printShape("Resize src", image_mat->GetDims());
     printShape("Resize dst", input_mat->GetDims());
 #else
-    status = predictor->Resize(image_mat, input_mat, TNNInterpNearest);
+    status = predictor->Resize(image_mat, input_mat, TNNInterpLinear);
 #endif
 
     std::shared_ptr<TNNSDKOutput> sdk_output = nullptr;

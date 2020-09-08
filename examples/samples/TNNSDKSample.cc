@@ -760,6 +760,8 @@ void Point(void *data_rgba, int image_height, int image_width, int x, int y, flo
     x_end   = std::min(std::max(0, x_end), image_width - 1);
     y_start = std::min(std::max(0, y_start), image_height - 1);
     y_end   = std::min(std::max(0, y_end), image_height - 1);
+    x_center = std::min(std::max(0, x_center), image_width - 1);
+    y_center = std::min(std::max(0, y_center), image_height - 1);
     
     unsigned char color = std::min(std::max(0, int(175 + z*80)), 255);
     
