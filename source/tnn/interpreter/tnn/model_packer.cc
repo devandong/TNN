@@ -199,43 +199,85 @@ Status ModelPacker::PackModel(std::string file_path) {
     header.serialize(*serializer);
 
     auto &layer_interpreter_map = ModelInterpreter::GetLayerInterpreterMap();
-    auto layers = net_struct->layers;
-    auto resource_map = net_resource->resource_map;
+    auto layers                 = net_struct->layers;
+    auto resource_map           = net_resource->resource_map;
+    std::set<std::string> blob_scale_set;
+    Status result;
     for (auto layer_info : layers) {
+        // save input blobs scale
         std::string layer_name = layer_info->name;
-        if (resource_map.find(layer_name) == resource_map.end()){
-            continue;
+        if (layer_info->param->quantized) {
+            for (auto &input_name : layer_info->inputs) {
+                auto blob_scale_name = input_name + BLOB_SCALE_SUFFIX;
+                if (blob_scale_set.find(blob_scale_name) != blob_scale_set.end()) {
+                    continue;
+                }
+                blob_scale_set.insert(blob_scale_name);
+                result = PackResource(resource_map, blob_scale_name, serializer, write_stream);
+                if (result != TNN_OK) {
+                    write_stream.close();
+                    return result;
+                }
+            }
         }
-        auto iter = resource_map.find(layer_name);
-        if (iter->second == nullptr) {
-            continue;
+        // save layer resource
+        result = PackResource(resource_map, layer_name, serializer, write_stream);
+        if (result != TNN_OK) {
+            write_stream.close();
+            return result;
         }
-        layer_header ly_head;
-        ly_head.name_   = iter->first;
-        ly_head.type_     = LAYER_NOT_SUPPORT;  // just use type_str_ to judge
-        ly_head.type_str_ = layer_info->type_str;
-        ly_head.serialize(*serializer);
+        // save output blob scale
+        if (layer_info->param->quantized) {
+            for (auto &output_name : layer_info->outputs) {
+                auto blob_scale_name = output_name + BLOB_SCALE_SUFFIX;
+                if (blob_scale_set.find(blob_scale_name) != blob_scale_set.end()) {
+                    continue;
+                }
+                blob_scale_set.insert(blob_scale_name);
+                result = PackResource(resource_map, blob_scale_name, serializer, write_stream);
+                if (result != TNN_OK) {
+                    write_stream.close();
+                    return result;
+                }
+            }
+        }
+    }
+    write_stream.close();
+    return TNN_OK;
+}
 
+Status ModelPacker::PackResource(std::map<std::string, std::shared_ptr<LayerResource>> &resource_map,
+                                 std::string &layer_name, std::shared_ptr<Serializer> serializer,
+                                 std::ofstream &write_stream) {
+    // quantized
+    auto &layer_interpreter_map = ModelInterpreter::GetLayerInterpreterMap();
+    if (resource_map.find(layer_name) != resource_map.end() && resource_map.find(layer_name)->second != nullptr) {
+        auto iter       = resource_map.find(layer_name);
+        auto layer_info = FindLayerInfo(layer_name);
+        layer_header ly_header;
+        ly_header.name_     = iter->first;
+        ly_header.type_     = layer_info->type;
+        ly_header.type_str_ = layer_info->type_str;
+        ly_header.serialize(*serializer);
         LayerResource *layer_resource = iter->second.get();
         auto layer_interpreter        = layer_interpreter_map[layer_info->type];
         if (layer_interpreter != nullptr) {
             Status result = layer_interpreter->SaveResource(*serializer, layer_info->param.get(), layer_resource);
             if (result != TNN_OK) {
-                write_stream.close();
-                return result;
+                LOGE(
+                    "Error: layer interpreter save resource failed (name:%s "
+                    "type_from_str:%s type:%d)\n",
+                    ly_header.name_.c_str(), ly_header.type_str_.c_str(), ly_header.type_);
+                return Status(TNNERR_PACK_MODEL, "model content is invalid");
             }
         } else {
-            write_stream.close();
             LOGE(
-                "Error: layer_interpreter is null (name:%s "
+                "Error: layer interpreter is null (name:%s "
                 "type_from_str:%s type:%d)\n",
-                ly_head.name_.c_str(), ly_head.type_str_.c_str(), ly_head.type_);
-            return Status(TNNERR_LOAD_MODEL, "model content is invalid");
+                ly_header.name_.c_str(), ly_header.type_str_.c_str(), ly_header.type_);
+            return Status(TNNERR_PACK_MODEL, "unsupport layer resource type");
         }
     }
-
-    write_stream.close();
-
     return TNN_OK;
 }
 

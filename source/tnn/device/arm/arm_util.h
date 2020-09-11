@@ -77,6 +77,15 @@ template <typename T>
 int ConvertWeightsFromOI3HWToOHW12(T *src, T *dst, int input_channel, int output_channel, int height, int width);
 
 int PackINT8Weight(int8_t *src, int8_t *dst, int group, int input_channel, int output_channel, int height, int width);
+
+void NV12ToBGR(const unsigned char* nv12, unsigned char* bgr, int height, int width);
+
+void NV21ToBGR(const unsigned char* nv21, unsigned char* bgr, int height, int width);
+
+void BGRToGray(const unsigned char* bgr, unsigned char* gray, int height, int width);
+
+void BGRAToGray(const unsigned char* bgra, unsigned char* gray, int height, int width);
+
 }  // namespace TNN_NS
 
 #endif
