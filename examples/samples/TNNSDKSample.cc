@@ -767,12 +767,14 @@ void Point(void *data_rgba, int image_height, int image_width, int x, int y, flo
     
     for(int x = x_start; x<=x_end; ++x) {
         int offset                       = y_center * image_width + x;
-        image_rgba[offset]               = {color, 0, color, 0};
+        //image_rgba[offset]               = {color, 0, color, 0};
+        image_rgba[offset]               = {0, 255, 0, 0};
     }
     
     for(int y = y_start; y<=y_end; ++y) {
         int offset                       = y * image_width + x_center;
-        image_rgba[offset]               = {color, 0, color, 0};
+        //image_rgba[offset]               = {color, 0, color, 0};
+        image_rgba[offset]               = {0, 255, 0, 0};
     }
 }
 
