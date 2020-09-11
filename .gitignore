@@ -484,4 +484,8 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 
+#model
+model/
 
+#xcuserdata
+*xcuserdata/
