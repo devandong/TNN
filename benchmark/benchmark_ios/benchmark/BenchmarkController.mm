@@ -264,7 +264,7 @@ struct BenchResult {
     
     //inference
     //前向推断
-    bool profile_layer_time = false;
+    bool profile_layer_time = true;
 #if TNN_PROFILE
     if (profile_layer_time) {
         instance->StartProfile();
