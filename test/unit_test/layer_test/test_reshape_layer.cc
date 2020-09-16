@@ -31,10 +31,13 @@ TEST_P(ReshapeLayerTest, ReshapeLayer) {
     int reshape_type = std::get<3>(GetParam());
     DeviceType dev   = ConvertDeviceType(FLAGS_dt);
 
-    batch = 1;
-    channel = 6;
-    int input_height = 2;
-    int input_width = 4;
+    //batch = 1;
+    //channel = 6;
+    //int input_height = 2;
+    //int input_width = 4;
+
+    int input_height = input_size;
+    int input_width  = input_size + 1;
 
     // blob desc
     //auto inputs_desc  = CreateInputBlobsDesc(batch, channel, input_size, 1, DATA_TYPE_FLOAT);
@@ -47,7 +50,12 @@ TEST_P(ReshapeLayerTest, ReshapeLayer) {
     param.reshape_type = reshape_type;
     param.axis         = 0;
     param.num_axes     = 4;
-    param.shape        = {0, 8, 3, 2};
+    param.shape        = {0, 0, 0, 0};
+    if (param.reshape_type == 0) {
+        param.shape = {0, channel, input_width, input_height};;
+    } else {
+        param.shape = {0, input_height, input_width, channel};
+    }
 
     Run(LAYER_RESHAPE, &param, nullptr, inputs_desc, outputs_desc);
 }
