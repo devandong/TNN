@@ -15,6 +15,8 @@
 #include "tnn/device/metal/acc/metal_common.h"
 #include <metal_stdlib>
 
+#define PAD4_CHECK 1
+
 using namespace metal;
 
 #if TNN_METAL_FULL_PRECISION
