@@ -39,7 +39,7 @@ protected:
     static void SetUpTestCase();
 
     void Run(LayerType, LayerParam* param, LayerResource* resource, std::vector<BlobDesc>& inputs_desc,
-             std::vector<BlobDesc>& outputs_desc, bool test_border = false);
+             std::vector<BlobDesc>& outputs_desc, bool test_border = true);
 
     static void TearDownTestCase();
 
