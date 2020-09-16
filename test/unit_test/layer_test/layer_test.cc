@@ -74,7 +74,7 @@ void LayerTest::SetUpTestCase() {
 }
 
 void LayerTest::Run(LayerType type, LayerParam* param, LayerResource* resource, std::vector<BlobDesc>& inputs_desc,
-                    std::vector<BlobDesc>& outputs_desc) {
+                    std::vector<BlobDesc>& outputs_desc, bool test_border) {
     Status status = TNN_OK;
     // Init cpu and device layer
     status = Init(type, param, resource, inputs_desc, outputs_desc);
@@ -101,7 +101,11 @@ void LayerTest::Run(LayerType type, LayerParam* param, LayerResource* resource, 
 
 #ifndef TNN_UNIT_TEST_BENCHMARK
     // Compare the result for both cpu and device layer
-    status = Compare();
+    if (test_border) {
+        status = CompareWithBorder();
+    } else {
+        status = Compare();
+    }
     if (status != TNN_OK) {
         EXPECT_EQ((int)status, TNN_OK);
         DeInit();
@@ -469,6 +473,106 @@ Status LayerTest::Compare() {
             LOGE("dev_cpu_mat.GetData(): %.6f %.6f %.6f %.6f\n", static_cast<float*>(dev_cpu_mat.GetData())[0],
                  static_cast<float*>(dev_cpu_mat.GetData())[1], static_cast<float*>(dev_cpu_mat.GetData())[2],
                  static_cast<float*>(dev_cpu_mat.GetData())[3]);
+        }
+
+        if (cmp_result != 0) {
+            break;
+        }
+    }
+    EXPECT_EQ(0, cmp_result);
+    return TNN_OK;
+}
+
+/*
+ * Compare the result of cpu layer and device layer.
+ * Extra border due to C4 padding is also considered.
+ */
+Status LayerTest::CompareWithBorder() {
+    int cmp_result = 0;
+    void* command_queue;
+    device_context_->GetCommandQueue(&command_queue);
+    for (int index = 0; index < cpu_outputs_.size(); ++index) {
+        /// cpu ref blob
+        Blob* cpu_output_blob = cpu_outputs_[index];
+        // dev blob
+        Blob* device_output_blob = device_outputs_[index];
+        // mat type for both
+        MatType mat_type = NCHW_FLOAT;
+        if (device_output_blob->GetBlobDesc().data_type == DATA_TYPE_BFP16) {
+            mat_type = RESERVED_BFP16_TEST;
+        } else if (device_output_blob->GetBlobDesc().data_type == DATA_TYPE_INT8) {
+            mat_type = RESERVED_INT8_TEST;
+        }
+        if (mat_type != NCHW_FLOAT) {
+            LOGE("unsupported mat_type, only NCHW_FLOAT supported!\n");
+            continue;
+        }
+        auto dims = cpu_output_blob->GetBlobDesc().dims;
+        // check if C4 padding exists
+        bool c4_padding = (dims[1] % 4 != 0);
+        int count = DimsVectorUtils::Count(dims);
+        // convert cpu blob to mat
+        TNN_NS::Mat* cpu_mat_ = new TNN_NS::Mat(DEVICE_NAIVE, mat_type, dims);
+        BlobConverter blob_converter_cpu(cpu_output_blob);
+        blob_converter_cpu.ConvertToMat(*cpu_mat_, MatConvertParam(), nullptr);
+        std::shared_ptr<TNN_NS::Mat> cpu_mat = nullptr;
+        auto c4_mat_dims = dims;
+        if (c4_padding) {
+            //allocate a new mat
+            c4_mat_dims[1] = (dims[1]/4+1)* 4;
+            cpu_mat = std::make_shared<TNN_NS::Mat>(DEVICE_NAIVE, mat_type, c4_mat_dims);
+            //set data
+            auto ele_size = DataTypeUtils::GetBytesSize(device_output_blob->GetBlobDesc().data_type);
+            memset(cpu_mat->GetData(), 0, ele_size* DimsVectorUtils::Count(c4_mat_dims));
+            auto block_size = dims[1] * dims[2] * dims[3];
+            auto c4_block_size = c4_mat_dims[1] * dims[2] * dims[3];
+            float* c4_data = static_cast<float*>(cpu_mat->GetData());
+            float* data    = static_cast<float*>(cpu_mat_->GetData());
+            for(int n=0; n<dims[0]; ++n) {
+                memcpy(c4_data + n*c4_block_size,  data + n*block_size, ele_size*block_size);
+            }
+        } else {
+            cpu_mat.reset(cpu_mat_);
+        }
+
+        // convert dev blob to cpu mat nchw
+        auto dev_cpu_mat = std::make_shared<TNN_NS::Mat>(DEVICE_NAIVE, mat_type, c4_mat_dims);
+        // modify the channel dimension
+        device_output_blob->GetBlobDesc().dims = c4_mat_dims;
+        BlobConverter blob_converter_dev(device_output_blob);
+
+        Status ret = blob_converter_dev.ConvertToMat(*(dev_cpu_mat.get()), MatConvertParam(), command_queue);
+        if (ret != TNN_OK) {
+            LOGE("output blob_converter failed (%s)\n", ret.description().c_str());
+            return ret;
+        }
+        device_output_blob->GetBlobDesc().dims = dims;
+        int c4_count = DimsVectorUtils::Count(c4_mat_dims);
+
+        // compare data
+        if (device_output_blob->GetBlobDesc().data_type == DATA_TYPE_FLOAT) {
+            cmp_result |= CompareData(static_cast<float*>(cpu_mat->GetData()),
+                                      static_cast<float*>(dev_cpu_mat->GetData()), c4_count, 0.01);
+        } else if (device_output_blob->GetBlobDesc().data_type == DATA_TYPE_HALF) {
+            cmp_result |= CompareData(static_cast<float*>(cpu_mat->GetData()),
+                                      static_cast<float*>(dev_cpu_mat->GetData()), c4_count, 0.01);
+        } else if (device_output_blob->GetBlobDesc().data_type == DATA_TYPE_BFP16) {
+            cmp_result |= CompareData(static_cast<bfp16_t*>(cpu_mat->GetData()),
+                                      static_cast<bfp16_t*>(dev_cpu_mat->GetData()), c4_count, 0.05);
+        } else if (device_output_blob->GetBlobDesc().data_type == DATA_TYPE_INT8) {
+            cmp_result |= CompareData(static_cast<int8_t*>(cpu_mat->GetData()),
+                                      static_cast<int8_t*>(dev_cpu_mat->GetData()), c4_count);
+        } else {
+            LOGE("UNKNOWN DATA TYPE!");
+        }
+
+        if (cmp_result != 0) {
+            LOGE("cpu_mat.GetData(): %.6f %.6f %.6f %.6f\n", static_cast<float*>(cpu_mat->GetData())[0],
+                 static_cast<float*>(cpu_mat->GetData())[1], static_cast<float*>(cpu_mat->GetData())[2],
+                 static_cast<float*>(cpu_mat->GetData())[3]);
+            LOGE("dev_cpu_mat.GetData(): %.6f %.6f %.6f %.6f\n", static_cast<float*>(dev_cpu_mat->GetData())[0],
+                 static_cast<float*>(dev_cpu_mat->GetData())[1], static_cast<float*>(dev_cpu_mat->GetData())[2],
+                 static_cast<float*>(dev_cpu_mat->GetData())[3]);
         }
 
         if (cmp_result != 0) {

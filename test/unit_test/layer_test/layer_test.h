@@ -39,7 +39,7 @@ protected:
     static void SetUpTestCase();
 
     void Run(LayerType, LayerParam* param, LayerResource* resource, std::vector<BlobDesc>& inputs_desc,
-             std::vector<BlobDesc>& outputs_desc);
+             std::vector<BlobDesc>& outputs_desc, bool test_border = false);
 
     static void TearDownTestCase();
 
@@ -49,6 +49,7 @@ private:
     Status Reshape();
     Status Forward();
     Status Compare();
+    Status CompareWithBorder();
     Status DeInit();
 
 protected:
