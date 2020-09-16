@@ -44,6 +44,7 @@ struct MetalParams {
     int output_slice;
     int share_channel = 0;
     int batch;
+    int channel;
 };
 
 // keep as same as BroadcastType in layer_param.h
@@ -66,6 +67,7 @@ struct MetalBroadcastParams {
     int broadcast_input0;
     int broadcast_input1;
     int batch;
+    int channel;
 };
 
 /**Pow Param Struct **/
@@ -82,6 +84,7 @@ struct MetalPowParams {
     float scale    = 1.0;
     float shift    = 0.0;
     int batch;
+    int channel;
 };
 
 /** Hard Sigmoid Param Struct **/
@@ -101,6 +104,7 @@ struct MetalHardSigmoidParams {
     int batch;
     int broadcast_input0;
     int broadcast_input1;
+    int channel;
 };
 
 /** Elu Param Struct **/
@@ -115,6 +119,7 @@ struct MetalEluParams {
     int output_slice;
     float alpha = 1.0;
     int batch;
+    int channel;
 };
 
 /** Clip Param Struct **/
@@ -130,6 +135,7 @@ struct MetalClipParams {
     float min = -FLT_MAX;
     float max = FLT_MAX;
     int batch;
+    int channel;
 };
 
 /** Selu Param Struct **/
@@ -145,6 +151,7 @@ struct MetalSeluParams {
     float alpha = 1.67326;
     float gamma = 1.0507;
     int batch;
+    int channel;
 };
 
 /** LRN Param Struct **/
@@ -164,6 +171,7 @@ struct MetalLRNParams {
     int size;
 
     int batch;
+    int channel;
 };
 
 /** Stride Slice Param Struct **/
@@ -185,6 +193,7 @@ struct MetalStrideSliceParams {
     int stride_c;
     int stride_h;
     int stride_w;
+    int channel;
 };
 
 /** Shuffle Param Struct **/
@@ -216,6 +225,7 @@ struct MetalInnerProductParams {
     int batch;
     int has_bias;
     int activation = -1;
+    int channel;
 };
 
 /** Conv Param Struct **/
@@ -247,6 +257,7 @@ struct MetalConvParams {
     int input_delta_y;
     int has_bias;
     int activation = -1;
+    int channel;
 };
 
 /** Winograd Param Struct **/
@@ -267,6 +278,7 @@ struct MetalWinogradParams {
     int unit;
     int has_bias;
     int activation = -1;
+    int channel;
 };
 
 /** Mat Mul Param Struct **/
@@ -275,6 +287,7 @@ struct MetalMatMul4x4Params {
     int output_height;
     int multi_length;
     int group;
+    int channel;
 };
 
 /** Pool Param Struct **/
@@ -294,6 +307,7 @@ struct MetalPoolParams {
     int stride_y;
     int pad_x;
     int pad_y;
+    int channel;
 };
 
 /** Upsample Param Struct **/
@@ -311,6 +325,7 @@ struct MetalUpsampleParams {
     float scale_x;
     // input_y/output_y
     float scale_y;
+    int channel;
 };
 
 /** Concat Param Struct **/
@@ -328,6 +343,7 @@ struct MetalConcatParams {
     int output_channel;
     int output_slice;
     int batch;
+    int channel;
 };
 
 /** Normalize Param Struct **/
@@ -338,6 +354,7 @@ struct MetalNormalizeParams {
     int output_slice;
     int batch;
     float epsilon = 1e-12;
+    int channel;
 };
 
 /** Reduce Param Struct
@@ -367,6 +384,7 @@ struct MetalReduceParams {
     int axis;
     int input_channel;
     int input_channel_mode_4;
+    int channel;
 };
 
 /** Softmax Param Struct **/
@@ -377,6 +395,7 @@ struct MetalSoftmaxParams {
     int output_slice;
     int channel_remain = 0;
     int batch;
+    int channel;
 };
 
 /** Pad Param Struct **/
@@ -398,6 +417,7 @@ struct MetalPadParams {
     int pad_c_b;
     int pad_c_e;
     int input_channel;
+    int channel;
 };
 
 /** Image Converter Param Struct **/
@@ -433,6 +453,7 @@ struct MetalSignedMulParams {
     float alpha;
     float beta;
     float gamma_inv;
+    int channel;
 };
 
 struct MetalResizeParams {
@@ -528,6 +549,7 @@ struct MetalReshapeParams {
         metal_params.output_size   = metal_params.output_height * metal_params.output_width;                           \
         metal_params.output_slice  = UP_DIV(dims_output[1], 4);                                                        \
         metal_params.batch         = dims_output[0];                                                                   \
+        metal_params.channel       = dims_output[1];                                                                   \
     } while (0)
 
 #define SetDefaultMetalConvParams(metal_params, conv_param)                                                            \

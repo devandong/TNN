@@ -46,7 +46,7 @@ TEST_P(PermuteLayerTest, PermuteLayer) {
         param.orders = {1, 2, 3, 0};
     }
 
-    Run(LAYER_PERMUTE, &param, nullptr, inputs_desc, outputs_desc);
+    Run(LAYER_PERMUTE, &param, nullptr, inputs_desc, outputs_desc, true);
 }
 
 }  // namespace TNN_NS

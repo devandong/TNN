@@ -28,6 +28,12 @@ kernel void acos(const device ftype4 *in [[buffer(0)]],
                 (int)gid.y * params.input_size + (int)gid.x;
     auto z_out = out + (int)gid.z * params.output_slice * params.output_size +
                  (int)gid.y * params.output_size + (int)gid.x;
-
+#if PAD4_CHECK
+    auto channels = (int)gid.y * 4 + int4(0, 1, 2, 3);
+    auto valid_channel = (channels < params.channel);
+    auto val = acos(*z_in);
+    *z_out = select(ftype4(0), val, valid_channel);
+#else
     *z_out = acos(*z_in);
+#endif
 }
