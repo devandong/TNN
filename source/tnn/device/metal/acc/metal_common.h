@@ -216,6 +216,8 @@ struct MetalInnerProductParams {
     int batch;
     int has_bias;
     int activation = -1;
+    int input_channel;
+    int output_channel;
 };
 
 /** Conv Param Struct **/

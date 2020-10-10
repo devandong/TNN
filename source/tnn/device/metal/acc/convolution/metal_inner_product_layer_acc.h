@@ -42,6 +42,9 @@ public:
     virtual Status ComputeThreadSize(const std::vector<Blob *> &inputs,
                                      const std::vector<Blob *> &outputs,
                                      MTLSize &size);
+    virtual Status ComputeThreadgroupSize(const std::vector<Blob *> &inputs,
+                                          const std::vector<Blob *> &outputs,
+                                          MTLSize &size);
     virtual Status SetKernelEncoderParam(
                                          id<MTLComputeCommandEncoder> encoder,
                                          const std::vector<Blob *> &inputs,
@@ -50,6 +53,10 @@ public:
 protected:
     Status isSupported(LayerParam *param, LayerResource *resource, const std::vector<Blob *> &inputs,
                        const std::vector<Blob *> &outputs);
+    // if use fine-grained kernel
+    bool use_fg_kernel_;
+    // if perform parallel reduction along the input_channel dimension
+    bool enable_splitk_;
 };
 
 }  // namespace TNN_NS

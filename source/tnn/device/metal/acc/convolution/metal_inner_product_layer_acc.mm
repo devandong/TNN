@@ -19,6 +19,9 @@
 #include "tnn/utils/data_type_utils.h"
 #include "tnn/utils/half_utils.h"
 
+#define THREADGROUP_SIZE 128
+#define kNumSplit 4
+
 namespace TNN_NS {
 
 Status MetalInnerProductLayerAcc::Init(Context *context, LayerParam *param,
@@ -29,6 +32,8 @@ Status MetalInnerProductLayerAcc::Init(Context *context, LayerParam *param,
     if (status != TNN_OK) {
         return status;
     }
+    use_fg_kernel_ = true;
+    enable_splitk_ = true;
     return MetalLayerAcc::Init(context, param, resource, inputs, outputs);
 }
 
@@ -68,11 +73,17 @@ MetalInnerProductLayerAcc::AllocateBufferWeight(const std::vector<Blob *> &input
     
     const int kh = dims_input[2];
     const int kw = dims_input[3];
-    
+
     if (!buffer_weight_) {
-        buffer_weight_ = AllocatePackedGOIHW16MetalBufferFormRawBuffer(layer_res->weight_handle,
+        if (use_fg_kernel_) {
+            buffer_weight_ = AllocatePackedNC4HW4MetalBufferFormRawBuffer(layer_res->weight_handle,
+                                                                   {output_channel, input_channel, kh, kw},
+                                                                   1, status);
+        } else {
+            buffer_weight_ = AllocatePackedGOIHW16MetalBufferFormRawBuffer(layer_res->weight_handle,
                                                                 {output_channel, input_channel, kh, kw},
                                                                 1, status);
+        }
     }
     return status;
 }
@@ -119,6 +130,8 @@ MetalInnerProductLayerAcc::AllocateBufferParam(const std::vector<Blob *> &inputs
     {
         MetalInnerProductParams metal_params;
         metal_params.has_bias   = param->has_bias;
+        metal_params.input_channel = dims_input[1];
+        metal_params.output_channel = dims_output[1];
 
         SetDefaultMetalParams(metal_params, dims_input, dims_output);
         buffer_param_ =
@@ -140,7 +153,13 @@ Status MetalInnerProductLayerAcc::Reshape(const std::vector<Blob *> &inputs,
 }
 
 std::string MetalInnerProductLayerAcc::KernelName(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs) {
-    return "inner_product";
+    if (use_fg_kernel_ && enable_splitk_) {
+        return "inner_product_fg_splitk";
+    } else if (use_fg_kernel_) {
+        return "inner_product_fg";
+    }else {
+        return "inner_product";
+    }
 }
 
 Status MetalInnerProductLayerAcc::SetKernelEncoderParam(
@@ -160,7 +179,35 @@ Status MetalInnerProductLayerAcc::SetKernelEncoderParam(
 Status MetalInnerProductLayerAcc::ComputeThreadSize(const std::vector<Blob *> &inputs,
                                         const std::vector<Blob *> &outputs,
                                         MTLSize &size) {
-    return MetalLayerAcc::ComputeThreadSize(inputs, outputs, size);
+    if (use_fg_kernel_ && enable_splitk_) {
+        size = MTLSizeMake(THREADGROUP_SIZE, 1, 1);
+        return TNN_OK;
+    } else if (use_fg_kernel_) {
+        auto output_dims = outputs[0]->GetBlobDesc().dims;
+        auto output_size = output_dims[2] * output_dims[3];
+        auto output_channel = output_dims[1];
+        auto batch = output_dims[0];
+
+        size = MTLSizeMake(output_size, output_channel, batch);
+        return TNN_OK;
+    } else {
+        return MetalLayerAcc::ComputeThreadSize(inputs, outputs, size);
+    }
+}
+
+Status MetalInnerProductLayerAcc::ComputeThreadgroupSize(const std::vector<Blob *> &inputs,
+                                        const std::vector<Blob *> &outputs,
+                                        MTLSize &size) {
+    if (use_fg_kernel_ && enable_splitk_) {
+        auto output_dims = outputs[0]->GetBlobDesc().dims;
+        auto output_channel = output_dims[1];
+        auto kNumOutputchannelPerTG = THREADGROUP_SIZE / kNumSplit;
+        auto kNumThreadgroups = UP_DIV(output_channel, kNumOutputchannelPerTG);
+        auto batch = output_dims[0];
+        size = MTLSizeMake(kNumThreadgroups*batch, 1, 1);
+        return TNN_OK;
+    }
+    return MetalLayerAcc::ComputeThreadgroupSize(inputs, outputs, size);
 }
 
 Status MetalInnerProductLayerAcc::Forward(const std::vector<Blob *> &inputs,

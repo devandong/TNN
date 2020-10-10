@@ -74,3 +74,14 @@ inline ftype4 activate(ftype4 value, int type) {
             return value;
     }
 }
+
+inline ftype activate(ftype value, int type) {
+    switch (type) {
+        case 1: // Relu see layer_param.h
+            return value > 0? value:0;
+        case 2: // Relu6 see layer_param.h
+            return value > 0? (value > 6? 6:value):0;
+        default: // None
+            return value;
+    }
+}
