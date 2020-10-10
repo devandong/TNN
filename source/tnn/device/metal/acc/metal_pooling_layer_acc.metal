@@ -82,10 +82,10 @@ kernel void pooling_global_average(const device ftype4 *in            [[buffer(0
     auto input_index_c = (int)gid.z * params.input_size;
     auto output_index_c = (int)gid.z * params.output_size;
     
-    const int max_index = min(32, params.input_size);
-    
     //do not use setThreadgroupMemoryLength, unknown bug will raise
     threadgroup float4 x_group[32];
+    x_group[t_index] = 0;
+    threadgroup_barrier(mem_flags::mem_threadgroup);
     
     //compute local sum
     float4 sum_x = float4(0);
@@ -94,20 +94,18 @@ kernel void pooling_global_average(const device ftype4 *in            [[buffer(0
         sum_x += temp;
     }
     x_group[t_index] = sum_x;
-    
     threadgroup_barrier(mem_flags::mem_threadgroup);
 
     //compute the average
     if (t_index == 0) {
         sum_x = float4(0);
-        for (int index = 0; index < max_index; index++) {
+#pragma unroll
+        for (int index = 0; index < 32; index++) {
             sum_x += x_group[index];
         }
         auto mean_x = sum_x / params.input_size;
         out[output_index_c] = ftype4(mean_x);
     }
-    
-    threadgroup_barrier(mem_flags::mem_threadgroup);
 }
 
 kernel void pooling_global_max(const device ftype4 *in            [[buffer(0)]],
@@ -121,10 +119,12 @@ kernel void pooling_global_max(const device ftype4 *in            [[buffer(0)]],
     auto input_index_c = (int)gid.z * params.input_size;
     auto output_index_c = (int)gid.z * params.output_size;
     
-    const int max_index = min(32, params.input_size);
+    //const int max_index = min(32, params.input_size);
     
     //do not use setThreadgroupMemoryLength, unknown bug will raise
     threadgroup ftype4 x_group[32];
+    x_group[t_index] = -FLT_MAX;
+    threadgroup_barrier(mem_flags::mem_threadgroup);
     
     //compute local maximum value
     ftype4 max_x = ftype4(-FTYPE_MAX);
@@ -139,11 +139,10 @@ kernel void pooling_global_max(const device ftype4 *in            [[buffer(0)]],
     //compute the maximum
     if (t_index == 0) {
         max_x = ftype4(-FTYPE_MAX);
-        for (int index = 0; index < max_index; index++) {
+#pragma unroll
+        for (int index = 0; index < 32; index++) {
             max_x = max(max_x, x_group[index]);
         }
         out[output_index_c] = max_x;
     }
-    
-    threadgroup_barrier(mem_flags::mem_threadgroup);
 }
