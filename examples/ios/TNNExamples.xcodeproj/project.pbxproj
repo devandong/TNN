@@ -57,6 +57,8 @@
 		EC4E1B5024C97A0600B88179 /* test_blazeface.jpg in Resources */ = {isa = PBXBuildFile; fileRef = EC4E1B4D24C97A0500B88179 /* test_blazeface.jpg */; };
 		EC4E1B5124C97A0600B88179 /* TNNBlazefaceDetectorController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EC4E1B4F24C97A0500B88179 /* TNNBlazefaceDetectorController.mm */; };
 		EC4E1B5424C97A5E00B88179 /* blazeface_detector.cc in Sources */ = {isa = PBXBuildFile; fileRef = EC4E1B5224C97A5E00B88179 /* blazeface_detector.cc */; };
+		EC79892225271B070024791D /* sneaker_detector_3d.cc in Sources */ = {isa = PBXBuildFile; fileRef = EC79892025271B070024791D /* sneaker_detector_3d.cc */; };
+		EC798939252E02060024791D /* sneaker_tracker_3d.cc in Sources */ = {isa = PBXBuildFile; fileRef = EC798937252E02060024791D /* sneaker_tracker_3d.cc */; };
 		ECAD84F924D7F01E0074EA95 /* TNNFacemeshController.mm in Sources */ = {isa = PBXBuildFile; fileRef = ECAD84F824D7F01E0074EA95 /* TNNFacemeshController.mm */; };
 		ECAD84FD24D7F0AE0074EA95 /* face_mesh.cc in Sources */ = {isa = PBXBuildFile; fileRef = ECAD84FB24D7F0AE0074EA95 /* face_mesh.cc */; };
 		ECAD84FF24D801690074EA95 /* test_facemesh.jpg in Resources */ = {isa = PBXBuildFile; fileRef = ECAD84FE24D801690074EA95 /* test_facemesh.jpg */; };
@@ -169,6 +171,10 @@
 		EC4E1B4F24C97A0500B88179 /* TNNBlazefaceDetectorController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TNNBlazefaceDetectorController.mm; sourceTree = "<group>"; };
 		EC4E1B5224C97A5E00B88179 /* blazeface_detector.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = blazeface_detector.cc; sourceTree = "<group>"; };
 		EC4E1B5324C97A5E00B88179 /* blazeface_detector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = blazeface_detector.h; sourceTree = "<group>"; };
+		EC79892025271B070024791D /* sneaker_detector_3d.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sneaker_detector_3d.cc; sourceTree = "<group>"; };
+		EC79892125271B070024791D /* sneaker_detector_3d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sneaker_detector_3d.h; sourceTree = "<group>"; };
+		EC798937252E02060024791D /* sneaker_tracker_3d.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sneaker_tracker_3d.cc; sourceTree = "<group>"; };
+		EC798938252E02060024791D /* sneaker_tracker_3d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sneaker_tracker_3d.h; sourceTree = "<group>"; };
 		ECAD84F824D7F01E0074EA95 /* TNNFacemeshController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TNNFacemeshController.mm; sourceTree = "<group>"; };
 		ECAD84FA24D7F0400074EA95 /* TNNFacemeshController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TNNFacemeshController.h; sourceTree = "<group>"; };
 		ECAD84FB24D7F0AE0074EA95 /* face_mesh.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = face_mesh.cc; sourceTree = "<group>"; };
@@ -388,6 +394,10 @@
 				ECAD84FC24D7F0AE0074EA95 /* face_mesh.h */,
 				ECD14A002505F88C00271443 /* face_detect_mesh.cc */,
 				ECD14A012505F88C00271443 /* face_detect_mesh.h */,
+				EC79892025271B070024791D /* sneaker_detector_3d.cc */,
+				EC79892125271B070024791D /* sneaker_detector_3d.h */,
+				EC798937252E02060024791D /* sneaker_tracker_3d.cc */,
+				EC798938252E02060024791D /* sneaker_tracker_3d.h */,
 			);
 			name = base;
 			path = ../../base;
@@ -563,7 +573,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EC79892225271B070024791D /* sneaker_detector_3d.cc in Sources */,
 				9D71E79D24C4E92A00074C1A /* TNNImageClassifyController.mm in Sources */,
+				EC798939252E02060024791D /* sneaker_tracker_3d.cc in Sources */,
 				9D71E7CC24C8404100074C1A /* TNNYoloObjectDetectorViewModel.mm in Sources */,
 				9D71E7C324C5BE1200074C1A /* TNNViewModel.mm in Sources */,
 				9D71E7BB24C5685F00074C1A /* TNNYoloObjectDetectorController.mm in Sources */,
@@ -756,7 +768,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/TNNExamples",
 				);
-				HEADER_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "/Users/devandong/working/eigen/eigen-3.3.7";
 				INFOPLIST_FILE = TNNExamples/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -785,7 +797,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/TNNExamples",
 				);
-				HEADER_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "/Users/devandong/working/eigen/eigen-3.3.7";
 				INFOPLIST_FILE = TNNExamples/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (

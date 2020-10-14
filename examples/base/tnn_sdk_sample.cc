@@ -16,6 +16,7 @@
 #include <cstring>
 #include <sys/time.h>
 #include <float.h>
+#include "tnn/utils/dims_vector_utils.h"
 
 #if defined(__APPLE__)
 #include "TargetConditionals.h"
@@ -429,6 +430,45 @@ Status TNNSDKSample::Copy(std::shared_ptr<TNN_NS::Mat> src, std::shared_ptr<TNN_
     status = MatUtils::Copy(*(src.get()), *(dst.get()), command_queue);
     if (status != TNN_NS::TNN_OK){
         LOGE("copy failed with:%s\n", status.description().c_str());
+    }
+    
+    return status;
+}
+
+Status TNNSDKSample::CopyMakeBorder(std::shared_ptr<TNN_NS::Mat> src,
+                      std::shared_ptr<TNN_NS::Mat> dst,
+                      int top, int bottom, int left, int right,
+                                    TNNBorderType border_type) {
+    Status status = TNN_OK;
+    
+    if (src->GetMatType() != dst->GetMatType()) {
+        return Status(TNNERR_PARAM_ERR, "src and dst have differnt device types!");
+    }
+    if (src->GetDeviceType() != DEVICE_ARM || src->GetMatType() != N8UC4) {
+        return Status(TNNERR_PARAM_ERR, "invalid device type or mat type!");
+    }
+    if (border_type != TNNBorderConstant) {
+        return Status(TNNERR_PARAM_ERR, "invalid border type!");
+    }
+    
+    auto src_dims = src->GetDims();
+    auto dst_dims = dst->GetDims();
+    
+    uint8_t *src_data = static_cast<uint8_t *>(src->GetData());
+    uint8_t *dst_data = static_cast<uint8_t *>(dst->GetData());
+    memset(dst_data, 0, sizeof(uint8_t)*DimsVectorUtils::Count(dst_dims));
+
+    for(int h=0; h<src_dims[2]; ++h) {
+        auto dst_data_row = dst_data + (top + h) * dst_dims[3] + left;
+        auto src_data_row = src_data + h * src_dims[3];
+        auto offset = 0;
+        for(int w=0; w<src_dims[3]; ++w) {
+            dst_data_row[offset + 0] = src_data_row[offset + 0];
+            dst_data_row[offset + 1] = src_data_row[offset + 1];
+            dst_data_row[offset + 2] = src_data_row[offset + 2];
+            dst_data_row[offset + 3] = src_data_row[offset + 3];
+            offset += 4;
+        }
     }
     
     return status;

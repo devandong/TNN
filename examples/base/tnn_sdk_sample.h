@@ -174,6 +174,10 @@ public:
     Status Crop(std::shared_ptr<TNN_NS::Mat> src, std::shared_ptr<TNN_NS::Mat> dst, int start_x, int start_y);
     Status WarpAffine(std::shared_ptr<TNN_NS::Mat> src, std::shared_ptr<TNN_NS::Mat> dst, TNNInterpType interp_type, TNNBorderType border_type, float trans_mat[2][3]);
     Status Copy(std::shared_ptr<TNN_NS::Mat> src, std::shared_ptr<TNN_NS::Mat> dst);
+    Status CopyMakeBorder(std::shared_ptr<TNN_NS::Mat> src,
+                          std::shared_ptr<TNN_NS::Mat> dst,
+                          int top, int bottom, int left, int right,
+                          TNNBorderType border_type = TNNBorderConstant);
 
 protected:
     BenchOption bench_option_;
