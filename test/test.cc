@@ -372,8 +372,20 @@ namespace test {
                     }
                 }
             } else {
-                LOGD("input path: %s\n", FLAGS_ip.c_str());
-                std::ifstream input_stream(FLAGS_ip);
+                // different input use different input files
+                std::stringstream ss;
+                ss << FLAGS_ip;
+                ss << "/";
+                ss << name;
+                ss << ".txt";
+                auto input_path = ss.str();
+                LOGD("input path: %s\n", input_path.c_str());
+                printf("use file:%s for blob:%s\n", input_path.c_str(), name.c_str());
+                std::ifstream input_stream(input_path);
+                if (!input_stream || !input_stream.good()) {
+                    printf("open input file:%s failed!\n", input_path.c_str());
+                    continue;
+                }
                 for (int i = 0; i < data_count; i++) {
                     if (mat_type == NCHW_FLOAT) {
                         input_stream >> reinterpret_cast<float*>(mat_data)[i];
@@ -416,12 +428,28 @@ namespace test {
 
 
     void WriteOutput(MatMap& outputs) {
-        std::ofstream f(FLAGS_op);
-        LOGD("the output path: %s\n", FLAGS_op.c_str());
+        //LOGD("the output path: %s\n", FLAGS_op.c_str());
+        for (auto output : outputs) {
+            auto name = output.first;
+
+            auto mat  = output.second;
+            int data_count     = DimsVectorUtils::Count(mat->GetDims());
+            std::stringstream ss;
+            ss << FLAGS_op;
+            ss << "/";
+            ss << name;
+            ss << ".txt";
+            auto output_path = ss.str();
+            std::ofstream f(output_path);
+            if (!f || !f.good()){
+                printf("open output file:%s failed!\n", output_path.c_str());
+                continue;
+            }
+            printf("output file:%s for blob:%s\n", output_path.c_str(), name.c_str());
+
         if (!FLAGS_fc) {
             LOGD("output path: %s\n", FLAGS_op.c_str());
             f << outputs.size() << std::endl;
-            for (auto output : outputs) {
                 f << output.first;
                 auto mat      = output.second;
                 DimsVector dims = mat->GetDims();
@@ -430,9 +458,7 @@ namespace test {
                     f << " " << dim;
                 }
                 f << std::endl;
-            }
         } else {
-            for (auto output : outputs) {
                 LOGD("the output name: %s\n", output.first.c_str());
                 auto mat        = output.second;
                 DimsVector dims   = mat->GetDims();
@@ -442,17 +468,13 @@ namespace test {
                 }
                 shape += ")";
                 LOGD("the output shape: %s\n", shape.c_str());
-            }
         }
-        for (auto output : outputs) {
-            auto mat  = output.second;
-            int data_count     = DimsVectorUtils::Count(mat->GetDims());
             float* data = reinterpret_cast<float*>(mat->GetData());
             for (int c = 0; c < data_count; ++c) {
                 f << std::fixed << std::setprecision(6) << data[c] << std::endl;
             }
-        }
         f.close();
+        }
     }
 
     void FreeMatMapMemory(MatMap& mat_map) {
