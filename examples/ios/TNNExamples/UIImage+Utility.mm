@@ -14,11 +14,33 @@
 
 #import "UIImage+Utility.h"
 
+#import <string>
+#import <fstream>
+#import <iostream>
+
 namespace utility {
 std::shared_ptr<char> UIImageGetData(UIImage *image) {
     int height = (int)CGImageGetHeight(image.CGImage);
     int width  = (int)CGImageGetWidth(image.CGImage);
     return UIImageGetData(image, height, width, 0);
+}
+
+std::shared_ptr<char> ImagetextGetData(NSString* path_, int height, int width) {
+    auto data = std::shared_ptr<char>((char*)calloc(height * width * 4, 1), [](char *p) { free(p); });
+    
+    const std::string path = [path_ UTF8String];
+    std::ifstream in(path);
+    assert(in && in.good());
+    
+    for(int i=0; i<height * width * 4; ++i) {
+        int pixel = 0;
+        in >> pixel;
+        data.get()[i] = static_cast<char>(pixel);
+        //std::cout << i <<":\t" << pixel <<std::endl;
+    }
+    in.close();
+    
+    return data;
 }
 
 std::shared_ptr<char> UIImageGetData(UIImage *image, int height, int width, int gravity) {
@@ -88,7 +110,43 @@ std::shared_ptr<char> UIImageGetData(UIImage *image, int height, int width, int 
     
     CGContextRelease(contextRef);
     CGColorSpaceRelease(colorSpace);
-
+    
+    int idx = 0;
+    char* data_ptr = static_cast<char *>(data.get());
+    for(int h=0; h<cols; ++h) {
+        for(int w=0; w<rows; ++w) {
+            printf("[%d %d %d %d]\n", static_cast<uint8_t>(data_ptr[idx]), static_cast<uint8_t>(data_ptr[idx+1]), static_cast<uint8_t>(data_ptr[idx+2]), static_cast<uint8_t>(data_ptr[idx+3]));
+            idx += 4;
+        }
+    }
+    
+    CGImageRef cgimage = [image CGImage];
+    CGImageAlphaInfo info = CGImageGetAlphaInfo(cgimage);
+    if (info == kCGImageAlphaNone) {
+        printf("alpha none");
+    }
+    if (info == kCGImageAlphaOnly) {
+        printf("alpha only");
+    }
+    if (info == kCGImageAlphaFirst) {
+        printf("alpha first");
+    }
+    if (info == kCGImageAlphaLast) {
+        printf("alpha last");
+    }
+    if (info == kCGImageAlphaPremultipliedLast) {
+        printf("alpha premultiplied last");
+    }
+    if (info == kCGImageAlphaPremultipliedFirst) {
+        printf("alpha premultiplied first");
+    }
+    if (info == kCGImageAlphaNoneSkipLast) {
+        printf("alpha none skip last");
+    }
+    if (info == kCGImageAlphaNoneSkipFirst) {
+        printf("alpha none skip first");
+    }
+    
     return data;
 }
 
