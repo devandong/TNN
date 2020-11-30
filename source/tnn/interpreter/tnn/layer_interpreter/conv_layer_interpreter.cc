@@ -122,6 +122,20 @@ Status ConvLayerInterpreter::SaveResource(Serializer& serializer, LayerParam* pa
         serializer.PutRaw(layer_res->scale_handle);
     }
 
+    if (param->name == "Conv_final") {
+        float* weights = layer_res->filter_handle.force_to<float*>();
+        auto count = layer_param->output_channel*layer_param->input_channel*layer_param->group*layer_param->kernels[1]*layer_param->kernels[0] / layer_param->group;
+        printf("%s:%d, %d, %d, %d, %d\n", param->name.c_str(),
+                                           layer_param->output_channel,
+                                           layer_param->input_channel,
+                                           layer_param->group,
+                                           layer_param->kernels[1],
+                                           layer_param->kernels[0] );
+        for(int i=0; i<count; ++i) {
+            printf("%d:%f\n", i, weights[i]);
+        }
+    }
+
     return TNN_OK;
 }
 

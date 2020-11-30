@@ -34,6 +34,66 @@ Status GenerateRandomResource(LayerType type, LayerParam* param, LayerResource**
 }
 
 /*
+ * Fill with specific generator
+ */
+template <typename T>
+void GaussianFill1D(T*ptr, int ksize, float sigma) {
+    if (sigma <= 0)
+        return;
+    if (ksize %2 != 1)
+        return;
+
+    const double sd_minus_0_125 = -0.125;
+    double scale_2x = sd_minus_0_125 / (sigma * sigma);
+    
+    int length_half = (ksize - 1) / 2;
+    std::vector<double> values(length_half +  1);
+    double sum = 0;
+    for(int i=0, x=1-ksize; i<length_half; ++i, x+=2) {
+        double t = exp(static_cast<double>(x*x) * scale_2x);
+        values[i] = t;
+        sum += t;
+    }
+    sum *= 2;
+    sum += 1;
+    
+    double mul1 = static_cast<double>(1.0) / sum;
+    for(int i=0; i<length_half; ++i) {
+        double t = values[i] * mul1;
+        ptr[i] = t;
+        ptr[ksize - 1 - i] = t;
+    }
+    ptr[length_half] = 1 * mul1;
+}
+
+template <typename T>
+void GaussianFill1D(T*ptr, int count, int ksize, float sigma) {
+    printf("===== Generate Guissian 1D  weights, %d planes, %d floats in a kernel\n",
+            count, ksize);
+    for(int c=0; c<count; ++c) {
+        GaussianFill1D(ptr+c*ksize, ksize, sigma);
+    }
+}
+
+template <typename T>
+void GaussianFill2D(T*ptr, int count, int kh, int kw, float sigma_w, float sigma_h) {
+     printf("===== Generate Guissian 2D  weights, %d planes, %d floats in a kernel\n",
+            count, kh*kw);
+    T* buffer = new T[kh+kw];
+    GaussianFill1D(buffer, kw, sigma_w);
+    GaussianFill1D(buffer+kw, kh, sigma_h);
+    for (int n = 0; n < count; ++n) {
+        T* ptr_c = ptr + n*kh*kw;
+        for (int h = 0; h < kh; ++h) {
+            for (int w = 0; w < kw; ++w) {
+                ptr_c[h * kw + w] = buffer[w] * buffer[kw + h];
+            }
+        }
+    }
+    delete[] buffer;
+}
+
+/*
  * Generate conv resource
  */
 class ConvolutionLayerResourceGenerator : public LayerResourceGenerator {
@@ -44,6 +104,7 @@ class ConvolutionLayerResourceGenerator : public LayerResourceGenerator {
         // auto layer_res   = dynamic_cast<ConvLayerResource*>(resource);
         auto layer_res = new ConvLayerResource();
 
+        printf("===== Generate gassian weights for layer:%s\n", param->name.c_str());
         auto dims = inputs[0]->GetBlobDesc().dims;
         if (layer_param->quantized) {
             layer_res->filter_handle = RawBuffer(dims[1] * layer_param->output_channel * layer_param->kernels[0] *
@@ -57,6 +118,20 @@ class ConvolutionLayerResourceGenerator : public LayerResourceGenerator {
             layer_res->filter_handle =
                 RawBuffer(dims[1]* layer_param->output_channel * layer_param->kernels[0] *
                           layer_param->kernels[1] / layer_param->group * sizeof(float));
+                if (layer_param->kernels[0] == 1 ) {
+                    GaussianFill1D(layer_res->filter_handle.force_to<float*>(),
+                                    dims[1]* layer_param->output_channel/layer_param->group,
+                                    layer_param->kernels[1], 3.0);
+                } else if (layer_param->kernels[1] == 1 ) {
+                    GaussianFill1D(layer_res->filter_handle.force_to<float*>(),
+                                    dims[1]* layer_param->output_channel/layer_param->group,
+                                    layer_param->kernels[0], 3.0);
+                } else {
+                    GaussianFill2D(layer_res->filter_handle.force_to<float*>(),
+                                    dims[1]* layer_param->output_channel/layer_param->group,
+                                    layer_param->kernels[1], 
+                                    layer_param->kernels[0], 3.0, 3.0);
+                }
 
             if (layer_param->bias) {
                 layer_res->bias_handle = RawBuffer(layer_param->output_channel * sizeof(float));

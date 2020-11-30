@@ -26,8 +26,27 @@
 #include "tnn/utils/blob_transfer_utils.h"
 #include "tnn/utils/cpu_utils.h"
 #include "tnn/utils/dims_vector_utils.h"
+#include "tnn/interpreter/tnn/model_packer.h"
 
 namespace TNN_NS {
+
+const std::string PROTO_SUFFIX = ".tnnproto";
+const std::string MODEL_SUFFIX = ".tnnmodel";
+
+static TNN_NS::Status GenerateModel(TNN_NS::NetStructure& net_structure, TNN_NS::NetResource& net_resource,
+                             const std::string& output_dir, const std::string& file_name) {
+    std::string proto_path = output_dir + file_name + PROTO_SUFFIX;
+    std::string model_path = output_dir + file_name + MODEL_SUFFIX;
+    printf("TNN Converter generate TNN proto path %s\n", proto_path.c_str());
+    printf("TNN Converter generate TNN model path %s\n", model_path.c_str());
+    TNN_NS::ModelPacker model_packer(&net_structure, &net_resource);
+    Status status = model_packer.Pack(proto_path, model_path);
+    if (status != TNN_OK) {
+        LOGE("generate tnn model failed!\n");
+        return TNN_NS::TNNERR_CONVERT_GENERATE_MODEL;
+    }
+    return TNN_NS::TNN_CONVERT_OK;
+}
 
 NetworkImplFactoryRegister<NetworkImplFactory<DefaultNetwork>> g_network_impl_default_factory_register(
     NETWORK_TYPE_DEFAULT);
@@ -120,6 +139,9 @@ Status DefaultNetwork::Init(NetworkConfig &net_config, ModelConfig &model_config
 
     net_structure_ = net_structure;
 
+    // devandong: save the model
+    // GenerateModel(*net_structure, *net_resource, "/Users/devandong/Desktop/", "123_merged");
+
     InputShapesMap input_shape_map;
     return Reshape(input_shape_map);
 }
@@ -169,6 +191,7 @@ Status DefaultNetwork::InitLayers(NetStructure *net_structure, NetResource *net_
 
         // generate resource if null
         if (net_resource->resource_map.count(layer_name) == 0) {
+            // printf("===== Generate random resource for:%s\n", layer_name.c_str());
             LayerParam *layer_param  = layer_info->param.get();
             LayerResource *layer_res = nullptr;
             GenerateRandomResource(type, layer_param, &layer_res, inputs);
