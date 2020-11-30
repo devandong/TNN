@@ -51,7 +51,6 @@
 		D1330F4C244AC4FA00CEBF29 /* TNNCameraVideoDevice.mm in Sources */ = {isa = PBXBuildFile; fileRef = D1330F4A244AC4FA00CEBF29 /* TNNCameraVideoDevice.mm */; };
 		D1330F4E244AFBFF00CEBF29 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1330F4D244AFBFF00CEBF29 /* AVFoundation.framework */; };
 		D18F1F1C244B4689002E71CA /* camera_rotate_fill.png in Resources */ = {isa = PBXBuildFile; fileRef = D18F1F1B244B4689002E71CA /* camera_rotate_fill.png */; };
-		EC0BE11B25134A0C009BD69A /* decoded_images in Resources */ = {isa = PBXBuildFile; fileRef = EC0BE11A25134A0C009BD69A /* decoded_images */; };
 		EC1B9AA824BC0B7B0003A742 /* ObjectDetectorYolo.cc in Sources */ = {isa = PBXBuildFile; fileRef = EC1B9AA724BC0B7B0003A742 /* ObjectDetectorYolo.cc */; };
 		EC2CF770250BD19A00EE3899 /* TNNYoutuFaceAlignController.mm in Sources */ = {isa = PBXBuildFile; fileRef = EC2CF76C250BD19A00EE3899 /* TNNYoutuFaceAlignController.mm */; };
 		EC2CF771250BD19A00EE3899 /* mean_pts_phase2.txt in Resources */ = {isa = PBXBuildFile; fileRef = EC2CF76E250BD19A00EE3899 /* mean_pts_phase2.txt */; };
@@ -65,6 +64,8 @@
 		ECAD84FF24D801690074EA95 /* test_facemesh.jpg in Resources */ = {isa = PBXBuildFile; fileRef = ECAD84FE24D801690074EA95 /* test_facemesh.jpg */; };
 		ECD14A022505F88C00271443 /* FaceDetectMesh.cc in Sources */ = {isa = PBXBuildFile; fileRef = ECD14A002505F88C00271443 /* FaceDetectMesh.cc */; };
 		ECD14A042505FE1700271443 /* TNNFaceDetectMeshViewModel.mm in Sources */ = {isa = PBXBuildFile; fileRef = ECD14A032505FE1700271443 /* TNNFaceDetectMeshViewModel.mm */; };
+		ECE594F1257105A400F61AB3 /* skeleton_detector.cc in Sources */ = {isa = PBXBuildFile; fileRef = ECE594EF257105A400F61AB3 /* skeleton_detector.cc */; };
+		ECE594F42571167600F61AB3 /* decoded_images in Resources */ = {isa = PBXBuildFile; fileRef = ECE594F32571167600F61AB3 /* decoded_images */; };
 		ECEC5DB224FFCC6C0044DDF1 /* YoutuFaceAlign.cc in Sources */ = {isa = PBXBuildFile; fileRef = ECEC5DB124FFCC6C0044DDF1 /* YoutuFaceAlign.cc */; };
 		ECEC65A924FFD5830044DDF1 /* TNNImageListDemoRunner.mm in Sources */ = {isa = PBXBuildFile; fileRef = ECEC61B124FFD5820044DDF1 /* TNNImageListDemoRunner.mm */; };
 		ECEF96DD24AED66D0094CB8B /* ObjectDetectorSSD.cc in Sources */ = {isa = PBXBuildFile; fileRef = ECEF96DC24AED66C0094CB8B /* ObjectDetectorSSD.cc */; };
@@ -161,7 +162,6 @@
 		D1330F4B244AC4FA00CEBF29 /* TNNCameraVideoDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TNNCameraVideoDevice.h; sourceTree = "<group>"; };
 		D1330F4D244AFBFF00CEBF29 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		D18F1F1B244B4689002E71CA /* camera_rotate_fill.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = camera_rotate_fill.png; sourceTree = "<group>"; };
-		EC0BE11A25134A0C009BD69A /* decoded_images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = decoded_images; sourceTree = "<group>"; };
 		EC1B9AA624BC0B4B0003A742 /* ObjectDetectorYolo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjectDetectorYolo.h; sourceTree = "<group>"; };
 		EC1B9AA724BC0B7B0003A742 /* ObjectDetectorYolo.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectDetectorYolo.cc; sourceTree = "<group>"; };
 		EC2CF76C250BD19A00EE3899 /* TNNYoutuFaceAlignController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TNNYoutuFaceAlignController.mm; sourceTree = "<group>"; };
@@ -183,6 +183,9 @@
 		ECD14A012505F88C00271443 /* FaceDetectMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FaceDetectMesh.h; sourceTree = "<group>"; };
 		ECD14A032505FE1700271443 /* TNNFaceDetectMeshViewModel.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TNNFaceDetectMeshViewModel.mm; sourceTree = "<group>"; };
 		ECD14A052505FE3100271443 /* TNNFaceDetectMeshViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TNNFaceDetectMeshViewModel.h; sourceTree = "<group>"; };
+		ECE594EF257105A400F61AB3 /* skeleton_detector.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = skeleton_detector.cc; sourceTree = "<group>"; };
+		ECE594F0257105A400F61AB3 /* skeleton_detector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = skeleton_detector.h; sourceTree = "<group>"; };
+		ECE594F32571167600F61AB3 /* decoded_images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = decoded_images; path = ../../../../Desktop/decoded_images; sourceTree = "<group>"; };
 		ECEC5DB024FFCC6C0044DDF1 /* YoutuFaceAlign.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YoutuFaceAlign.h; sourceTree = "<group>"; };
 		ECEC5DB124FFCC6C0044DDF1 /* YoutuFaceAlign.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = YoutuFaceAlign.cc; sourceTree = "<group>"; };
 		ECEC61B124FFD5820044DDF1 /* TNNImageListDemoRunner.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TNNImageListDemoRunner.mm; sourceTree = "<group>"; };
@@ -283,6 +286,7 @@
 		9DD579E123B5A20500A96E63 = {
 			isa = PBXGroup;
 			children = (
+				ECE594F32571167600F61AB3 /* decoded_images */,
 				9DD579EC23B5A20500A96E63 /* TNNExamples */,
 				9DD579EB23B5A20500A96E63 /* Products */,
 				9DD57A1023B5A8D000A96E63 /* Frameworks */,
@@ -358,6 +362,8 @@
 		9DDED30B2429A839000C09EA /* samples */ = {
 			isa = PBXGroup;
 			children = (
+				ECE594EF257105A400F61AB3 /* skeleton_detector.cc */,
+				ECE594F0257105A400F61AB3 /* skeleton_detector.h */,
 				9D49E7A22504BB5D00DD81D7 /* FaceDetectAligner.cc */,
 				9D49E7A32504BB5D00DD81D7 /* FaceDetectAligner.h */,
 				ECEC5DB124FFCC6C0044DDF1 /* YoutuFaceAlign.cc */,
@@ -445,7 +451,6 @@
 		ECEC5DC124FFD57E0044DDF1 /* TNNImageListDemoRunner */ = {
 			isa = PBXGroup;
 			children = (
-				EC0BE11A25134A0C009BD69A /* decoded_images */,
 				ECEC61B124FFD5820044DDF1 /* TNNImageListDemoRunner.mm */,
 				ECEC61B224FFD5820044DDF1 /* TNNImageListDemoRunner.h */,
 			);
@@ -534,7 +539,7 @@
 				9D71E7B024C560C900074C1A /* 004545.jpg in Resources */,
 				D18F1F1C244B4689002E71CA /* camera_rotate_fill.png in Resources */,
 				9DDED30A2429A0BE000C09EA /* model in Resources */,
-				EC0BE11B25134A0C009BD69A /* decoded_images in Resources */,
+				ECE594F42571167600F61AB3 /* decoded_images in Resources */,
 				EC2CF772250BD19A00EE3899 /* mean_pts_phase1.txt in Resources */,
 				ECAD84FF24D801690074EA95 /* test_facemesh.jpg in Resources */,
 				9D71E7BC24C5685F00074C1A /* dog_cropped.jpg in Resources */,
@@ -603,6 +608,7 @@
 				EC4E1B5424C97A5E00B88179 /* BlazeFaceDetector.cc in Sources */,
 				9D71E7A424C4F35A00074C1A /* TNNImageColourController.mm in Sources */,
 				ECAD84FD24D7F0AE0074EA95 /* Facemesh.cc in Sources */,
+				ECE594F1257105A400F61AB3 /* skeleton_detector.cc in Sources */,
 				D1330F4C244AC4FA00CEBF29 /* TNNCameraVideoDevice.mm in Sources */,
 				9D71E78B24C0AF4200074C1A /* TNNBoundingBox.mm in Sources */,
 				9D961FED24116548009B3FB1 /* RootNavController.mm in Sources */,
@@ -777,10 +783,10 @@
 					"-force_load",
 					"$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/tnn.framework/tnn",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tencent.youtu.TNNExmaples-devan";
+				PRODUCT_BUNDLE_IDENTIFIER = com.tencent.youtu.devan.TNNExmaples;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = arm64;
+				VALID_ARCHS = "arm64 x86_64";
 			};
 			name = Debug;
 		};
@@ -806,10 +812,10 @@
 					"-force_load",
 					"$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/tnn.framework/tnn",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tencent.youtu.TNNExmaples-devan";
+				PRODUCT_BUNDLE_IDENTIFIER = com.tencent.youtu.devan.TNNExmaples;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = arm64;
+				VALID_ARCHS = "arm64 x86_64";
 			};
 			name = Release;
 		};

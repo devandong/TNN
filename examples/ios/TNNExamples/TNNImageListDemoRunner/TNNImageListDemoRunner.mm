@@ -17,6 +17,7 @@
 #import "BlazeFaceDetector.h"
 #import "ObjectDetectorYolo.h"
 #import "UltraFaceDetector.h"
+#import "skeleton_detector.h"
 #import "UIImage+Utility.h"
 #import <Metal/Metal.h>
 #import <cstdlib>
@@ -121,13 +122,15 @@ using namespace TNN_NS;
 // Trigger running by pressing button
 - (IBAction)onBtnTNNExamples:(id)sender {
     // yolo
-    [self runYolo];
+    //[self runYolo];
     // blazeface
     //[self runBlazeface];
     //ultraface
     //[self runUltraface];
     //face align
     //[self runYoutuFaceAlign];
+    //skeleton
+    [self runSkeleton];
 }
 
 /*
@@ -411,6 +414,49 @@ using namespace TNN_NS;
     }
     return predictor;
 }
+
+-(std::shared_ptr<SkeletonDetector>) loadSkeleton {
+    std::shared_ptr<SkeletonDetector> predictor = nullptr;
+    
+    auto library_path = [[NSBundle mainBundle] pathForResource:@"tnn.metallib" ofType:nil];
+    auto model_path = [[NSBundle mainBundle] pathForResource:@"model/skeleton/skeleton_add_layers_v2.tnnmodel"
+                                                      ofType:nil];
+    auto proto_path = [[NSBundle mainBundle] pathForResource:@"model/skeleton/skeleton_add_layers_v2_720_460.tnnproto"
+                                                      ofType:nil];
+    if (proto_path.length <= 0 || model_path.length <= 0) {
+        NSLog(@"Error: proto or model path is invalid");
+        return predictor;
+    }
+
+    string proto_content =
+        [NSString stringWithContentsOfFile:proto_path encoding:NSUTF8StringEncoding error:nil].UTF8String;
+    NSData *data_mode    = [NSData dataWithContentsOfFile:model_path];
+    string model_content = [data_mode length] > 0 ? string((const char *)[data_mode bytes], [data_mode length]) : "";
+    if (proto_content.size() <= 0 || model_content.size() <= 0) {
+        NSLog(@"Error: proto or model path is invalid");
+        return predictor;
+    }
+
+    TNNComputeUnits units = self.switchGPU.isOn ? TNNComputeUnitsGPU : TNNComputeUnitsCPU;
+    auto option = std::make_shared<SkeletonDetectorOption>();
+    {
+        option->proto_content = proto_content;
+        option->model_content = model_content;
+        option->library_path = library_path.UTF8String;
+        option->compute_units = units;
+
+        option->min_threshold = 0.15f;
+    }
+        
+    predictor = std::make_shared<SkeletonDetector>();
+    auto status = predictor->Init(option);
+    if (status != TNN_OK) {
+        NSLog(@"Error: %s", status.description().c_str());
+            return predictor;
+    }
+    return predictor;
+}
+
 
 /*
  Model runner.
@@ -914,6 +960,84 @@ using namespace TNN_NS;
     float avg_time = sum_time / (idx * bench_option.forward_count);
     self.labelResult.text = [NSString stringWithFormat:@"device: %@\ntotal %d images\ntime per frame:%.3f ms", \
                              compute_units == TNNComputeUnitsGPU ? @"gpu" : @"arm", idx, avg_time];
+}
+
+-(void) runSkeleton {
+    auto predictor = [self loadSkeleton];
+    //preprocess
+    const int image_orig_height = (int)CGImageGetHeight(self.image_orig.CGImage);
+    const int image_orig_width  = (int)CGImageGetWidth(self.image_orig.CGImage);
+    DimsVector image_dims = {1, 3, image_orig_height, image_orig_width};
+    
+    std::shared_ptr<TNN_NS::Mat> image_mat = nullptr;
+    
+    auto units = predictor->GetComputeUnits();
+    
+    int idx = 0;
+    for (NSString * img_path in self.result) {
+        @autoreleasepool {
+            LOGE("processing image[%d]:%s\n", idx++,  [[img_path lastPathComponent] UTF8String]);
+            auto input_image = [UIImage imageWithContentsOfFile:img_path];
+            auto image_data = utility::UIImageGetData(input_image);
+            
+            if(units == TNNComputeUnitsCPU) {
+                image_mat = std::make_shared<TNN_NS::Mat>(DEVICE_ARM, TNN_NS::N8UC4, image_dims, image_data.get());
+            } else {
+                image_mat = std::make_shared<TNN_NS::Mat>(DEVICE_METAL, TNN_NS::N8UC4, image_dims);
+                id<MTLTexture> texture_rgba = (__bridge id<MTLTexture>)image_mat->GetData();
+                if (!texture_rgba) {
+                    self.labelResult.text = @"Error texture input rgba is nil";
+                    NSLog(@"Error texture input rgba is nil");
+                    return;
+                }
+                
+                [texture_rgba replaceRegion:MTLRegionMake2D(0, 0, image_dims[3], image_dims[2])
+                                mipmapLevel:0
+                                  withBytes:image_data.get()
+                                bytesPerRow:image_dims[3] * 4];
+            }
+            
+            Status status = TNN_OK;
+            
+            std::shared_ptr<TNNSDKOutput> sdk_output = nullptr;
+            status = predictor->Predict(std::make_shared<SkeletonDetectorInput>(image_mat), sdk_output);
+            
+            if (status != TNN_OK) {
+                NSLog(@"Error: %s", status.description().c_str());
+                return;
+            }
+            
+            std::vector<SkeletonInfo> skeleton_info;
+            if (sdk_output && dynamic_cast<SkeletonDetectorOutput *>(sdk_output.get())) {
+                auto skeleton_output = dynamic_cast<SkeletonDetectorOutput *>(sdk_output.get());
+                skeleton_info = skeleton_output->keypoint_list;
+            }
+            
+            for (int i = 0; i < skeleton_info.size(); i++) {
+                auto skeleton = skeleton_info[i];
+                //devan: us gravity 2 here will  cause face beging higher
+                //auto skeleton_orig = skeleton.AdjustToViewSize(image_orig_height, image_orig_width, 0);
+                int x = static_cast<int>(skeleton.key_points[0].first);
+                int y = static_cast<int>(skeleton.key_points[0].second);
+                Circle(image_data.get(), image_orig_height, image_orig_width, x, y, 1.0f, 3);
+            }
+            
+            UIImage *output_image = utility::UIImageWithDataRGBA((void *)image_data.get(), image_orig_height, image_orig_width);
+            //save output image
+#if TARGET_IPHONE_SIMULATOR
+            // save image on simulator
+            NSString *out_name = [[img_path lastPathComponent] stringByReplacingOccurrencesOfString: @".jpg" withString:@"_out.jpg"];
+            const std::string save_dir = "/Users/devandong/Desktop/output_img/skeleton_detect";
+            std::string save_path = save_dir+string([out_name UTF8String]);
+            NSString *path = [NSString stringWithCString:save_path.c_str()
+                                                encoding:[NSString defaultCStringEncoding]];
+            [UIImageJPEGRepresentation(output_image, 1.0) writeToFile:path atomically:YES];
+#else
+            // write to album on real device
+            UIImageWriteToSavedPhotosAlbum(output_image, nil, nil, nil);
+#endif
+        }
+    }
 }
 
 @end

@@ -29,7 +29,7 @@ DECLARE_LAYER_INTERPRETER(Upsample, LAYER_UPSAMPLE);
         int index                      = start_index;
 
         // pool_type
-        layer_param->type = atoi(layer_cfg_arr[index++].c_str());
+        layer_param->mode = atoi(layer_cfg_arr[index++].c_str());
 
         // scales
         float scale_h = (float)atof(layer_cfg_arr[index++].c_str());

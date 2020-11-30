@@ -130,9 +130,9 @@ Status ArmUpsampleLayerAcc::DoForward(const std::vector<Blob *> &inputs, const s
         if (output_data != input_data) {
             memcpy(output_data, input_data, oc_4 * dims_input[2] * dims_input[3] * 4 * sizeof(float));
         }
-    } else if (param->type == 1) {  // nearest
+    } else if (param->mode == 1) {  // nearest
         upsample_nearest2d(output_data, input_data, dims_input[2], dims_input[3], dims_output[2], dims_output[3], oc_4);
-    } else if (param->type == 2) {  // bilinear/linear
+    } else if (param->mode == 2) {  // bilinear/linear
         upsample_bilinear2d(output_data, input_data, dims_input[2], dims_input[3], dims_output[2], dims_output[3], oc_4,
                             (bool)param->align_corners);
 
