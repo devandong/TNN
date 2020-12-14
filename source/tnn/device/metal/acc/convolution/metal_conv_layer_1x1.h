@@ -36,6 +36,7 @@ public:
     virtual Status ComputeThreadSize(const std::vector<Blob *> &inputs,
                                      const std::vector<Blob *> &outputs,
                                      MTLSize &size);
+    bool group1_ = false;
 };
 
 }  // namespace TNN_NS
