@@ -42,6 +42,15 @@ public:
     virtual Status ComputeThreadSize(const std::vector<Blob *> &inputs,
                                      const std::vector<Blob *> &outputs,
                                      MTLSize &size);
+    virtual Status ComputeThreadgroupSize(const std::vector<Blob *> &inputs,
+                                         const std::vector<Blob *> &outputs,
+                                                           MTLSize &size);
+    
+    bool k3s1d1_spec = false;
+    bool k3s2d1_spec = false;
+    bool k5s1d1_spec = false;
+    bool k51s1d1_spec = false;
+    bool k15s1d1_spec = false;
 };
 
 }  // namespace TNN_NS

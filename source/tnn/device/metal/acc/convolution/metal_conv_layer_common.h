@@ -57,6 +57,9 @@ public:
     virtual Status ComputeThreadSize(const std::vector<Blob *> &inputs,
                                      const std::vector<Blob *> &outputs,
                                      MTLSize &size);
+    virtual Status ComputeThreadgroupSize(const std::vector<Blob *> &inputs,
+                                         const std::vector<Blob *> &outputs,
+                                                           MTLSize &size);
 protected:
     id<MTLBuffer> buffer_weight_ = nil;
     id<MTLBuffer> buffer_bias_   = nil;
