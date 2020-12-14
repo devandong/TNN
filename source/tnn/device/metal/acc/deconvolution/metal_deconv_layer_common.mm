@@ -215,7 +215,7 @@ Status MetalDeconvLayerCommon::Forward(const std::vector<Blob *> &inputs, const 
         }
     }
     [encoder endEncoding];
-    [context_impl commit];
+    [context_impl commit:this->is_last];
     TNN_PRINT_ENCODER(context_, encoder, this);
     return TNN_OK;
 }

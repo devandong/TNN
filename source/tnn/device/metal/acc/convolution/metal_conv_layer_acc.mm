@@ -57,7 +57,7 @@ Status MetalConvLayerAcc::Reshape(const std::vector<Blob *> &inputs, const std::
             }
         }
 
-        if (MetalConvLayer1x1::isPrefered(dynamic_cast<ConvLayerParam *>(param_), inputs, outputs)) {
+        else if (MetalConvLayer1x1::isPrefered(dynamic_cast<ConvLayerParam *>(param_), inputs, outputs)) {
             if (!conv_acc_impl_ || !dynamic_cast<MetalConvLayer1x1 *>(conv_acc_impl_.get())) {
                 auto conv_acc = make_shared<MetalConvLayer1x1>();
                 conv_acc->Init(context_, param_, resource_, inputs, outputs);
@@ -66,7 +66,7 @@ Status MetalConvLayerAcc::Reshape(const std::vector<Blob *> &inputs, const std::
             }
         }
 
-        if (MetalConvLayerWinograd::isPrefered(dynamic_cast<ConvLayerParam *>(param_), inputs, outputs)) {
+        else if (MetalConvLayerWinograd::isPrefered(dynamic_cast<ConvLayerParam *>(param_), inputs, outputs)) {
             if (!conv_acc_impl_ || !dynamic_cast<MetalConvLayerWinograd *>(conv_acc_impl_.get())) {
                 auto conv_acc = make_shared<MetalConvLayerWinograd>();
                 conv_acc->Init(context_, param_, resource_, inputs, outputs);
@@ -86,6 +86,7 @@ Status MetalConvLayerAcc::Reshape(const std::vector<Blob *> &inputs, const std::
 
 Status MetalConvLayerAcc::Forward(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs) {
     if (conv_acc_impl_) {
+        conv_acc_impl_->is_last = this->is_last;
         return conv_acc_impl_->Forward(inputs, outputs);
     } else {
         return Status(TNNERR_LAYER_ERR, "conv_acc_impl_ is nil");

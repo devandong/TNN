@@ -346,12 +346,15 @@ Status DefaultNetwork::Reshape(const InputShapesMap &inputs) {
     }
 
     Status ret = TNN_OK;
+    int layer_cnt = 0;
     for (auto cur_layer : layers_) {
         ret = cur_layer->Reshape();
         if (ret != TNN_OK) {
             return ret;
         }
+        layer_cnt += 1;
     }
+    layers_[layer_cnt-1]->SetIsLast(true);
     return ret;
 }
 

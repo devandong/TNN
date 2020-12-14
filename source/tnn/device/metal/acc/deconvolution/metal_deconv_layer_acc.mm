@@ -60,6 +60,7 @@ Status MetalDeconvLayerAcc::Reshape(const std::vector<Blob *> &inputs, const std
 
 Status MetalDeconvLayerAcc::Forward(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs) {
     if (deconv_acc_impl_) {
+        deconv_acc_impl_->is_last = this->is_last;
         return deconv_acc_impl_->Forward(inputs, outputs);
     } else {
         return Status(TNNERR_LAYER_ERR, "Deconv_acc_impl_ is nil");

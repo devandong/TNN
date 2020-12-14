@@ -17,11 +17,30 @@
 #import "tnn/device//metal/metal_command_queue.h"
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
+
+#define  AGGRESSIVE 1
+
 #if TNN_PROFILE
 #define kMetalCommandBufferDepth 1
 #else
 #define kMetalCommandBufferDepth 10
 #endif
+
+// active: one commandBuffer for a kernel; use 'busy-waiting' to synchronize
+#if AGGRESSIVE
+#undef kMetalCommandBufferDepth
+//static_assert(0);
+#define kMetalCommandBufferDepth 1
+#endif
+
+// passive: only one commandBuffer; use 'waitUntilCompleted' to synchronize
+#if PASSIVE
+#undef kMetalCommandBufferDepth
+//static_assert(0);
+#define kMetalCommandBufferDepth 10240
+#endif
+
+static int commit_cnt = 0;
 
 static NSUInteger smallest_log2(NSUInteger integer) {
     if (integer == 0)
@@ -87,7 +106,11 @@ TNNMMetalContextImpl *MetalContext::getMetalContextImpl() {
 }
 Status MetalContext::Synchronize() {
     if (metal_context_impl_) {
+#if AGGRESSIVE
+        ;
+#else
         [metal_context_impl_ waitUntilCompleted:nullptr];
+#endif
         return TNN_OK;
     } else {
         return Status(TNNERR_INST_ERR, "metal context is nil");
@@ -114,6 +137,8 @@ Status MetalContext::Synchronize() {
 
 @implementation TNNMMetalContextImpl
 
+
+
 - (instancetype)init {
     self = [super init];
     if (self) {
@@ -134,8 +159,10 @@ Status MetalContext::Synchronize() {
 }
 
 - (Status)onInstanceForwardBegin {
+    commit_cnt = 0;
     _commitCount = 0;
     if (!_commandBuffer || _commandBuffer.status >= MTLCommandBufferStatusCommitted) {
+        //printf("on instance forward!\n");
         _commandBuffer = [_commandQueue commandBuffer];
         [_commandBuffer enqueue];
     }
@@ -144,8 +171,11 @@ Status MetalContext::Synchronize() {
 }
 
 - (Status)onInstanceForwardEnd {
+#if !(AGGRESSIVE)
     [self commit:YES];
+#endif
     //    [self waitUntilCompleted];
+    //printf("=== commit_cnt=%d\n", commit_cnt);
     return TNN_OK;
 }
 
@@ -333,15 +363,54 @@ Status MetalContext::Synchronize() {
     }
 }
 
-- (void)commit {
+- (void) commit:(BOOL)is_last {
+#if AGGRESSIVE
+    __block volatile bool buffer_completed = false;
+    if (is_last == YES) {
+        if (!_commandBuffer) {
+            //printf("empty commandbuffer!\n");
+            return;
+        }
+        if (_commandBuffer.status >= MTLCommandBufferStatusCommitted) {
+            //printf("has been committed!\n");
+            return;
+        }
+        //printf("add handler!\n");
+        [_commandBuffer
+            addCompletedHandler:^(id<MTLCommandBuffer> _Nonnull commandBuffer) {
+            buffer_completed = true;
+        }];
+         //printf("commit!\n");
+        // commit
+        [_commandBuffer commit];
+        //printf("committed, starting waiting!\n");
+        // busy wait
+        while (!buffer_completed) {
+            for (volatile int i = 0; i < 100; ++i) {
+            }
+        }
+        if (_commandBuffer.error) {
+            LOGE("Error: %s\n", _commandBuffer.error.localizedDescription.UTF8String);
+            printf("Error: %s\n", _commandBuffer.error.localizedDescription.UTF8String);
+        }
+        //printf("committed, complete waiting!\n");
+        return;
+    }
+#endif
+    //printf("out-of-aggressive block!\n");
+    [self commit_inner:is_last];
+}
+
+- (void)commit_inner {
 #if TNN_METAL_DEBUG && TNN_METAL_BENCHMARK
-    [self commit:YES];
+    [self commit_inner:YES];
 #else
-    [self commit:NO];
+    [self commit_inner:NO];
 #endif
 }
 
-- (void)commit:(BOOL)force_commit {
+- (void)commit_inner:(BOOL)force_commit {
+    commit_cnt += 1;
     _commitCount++;
     if (!force_commit && _commitCount % kMetalCommandBufferDepth != 0) {
         return;

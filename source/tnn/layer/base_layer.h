@@ -65,7 +65,12 @@ public:
     virtual Status InferShapeAhead(std::vector<Blob*>& input_blobs, std::vector<Blob*>& output_blobs, LayerParam* param,
                                    LayerResource* resource);
 
-
+    void SetIsLast(bool is_last) {
+        this->layer_acc_->is_last = is_last;
+    }
+    bool IsLast() {
+        return this->layer_acc_->is_last;
+    }
 protected:
     LayerType type_;
 

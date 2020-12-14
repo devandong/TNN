@@ -153,6 +153,11 @@ private:
 - (void)commit:(BOOL)force_commit;
 
 /**
+ * @brief wait activelly
+ */
+- (void)waitActively:(std::shared_ptr<ProfilingData>)pdata;
+
+/**
  * @brief wait for completion
  */
 - (void)waitUntilCompleted:(std::shared_ptr<ProfilingData>)pdata;

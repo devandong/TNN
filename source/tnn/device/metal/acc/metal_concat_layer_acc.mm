@@ -188,7 +188,7 @@ Status MetalConcatLayerAcc::Forward(const std::vector<Blob *> &inputs, const std
             } while (0);
 
             [encoder endEncoding];
-            [context_impl commit];
+            [context_impl commit:this->is_last];
             TNN_PRINT_ENCODER(context_, encoder, this);
         } else {
             for (int i = 0; i < inputs.size(); i++) {
@@ -223,7 +223,7 @@ Status MetalConcatLayerAcc::Forward(const std::vector<Blob *> &inputs, const std
                 } while (0);
 
                 [encoder endEncoding];
-                [context_impl commit];
+                [context_impl commit:(this->is_last && i==(inputs.size()-1))];
                 TNN_PRINT_ENCODER(context_, encoder, this);
                 BREAK_IF(status != TNN_OK);
             }
@@ -263,7 +263,7 @@ Status MetalConcatLayerAcc::Forward(const std::vector<Blob *> &inputs, const std
             } while (0);
 
             [encoder endEncoding];
-            [context_impl commit];
+            [context_impl commit:(this->is_last && i==(inputs.size()-1))];
             TNN_PRINT_ENCODER(context_, encoder, this);
             BREAK_IF(status != TNN_OK);
             

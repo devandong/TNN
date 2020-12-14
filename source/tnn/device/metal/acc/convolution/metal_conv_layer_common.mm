@@ -129,6 +129,12 @@ Status MetalConvLayerCommon::ComputeThreadSize(const std::vector<Blob *> &inputs
     return TNN_OK;
 }
 
+Status MetalConvLayerCommon::ComputeThreadgroupSize(const std::vector<Blob *> &inputs,
+                                     const std::vector<Blob *> &outputs,
+                                                    MTLSize &size) {
+    return MetalLayerAcc::ComputeThreadgroupSize(inputs, outputs, size);
+}
+
 Status MetalConvLayerCommon::Forward(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs) {
     auto layer_param = dynamic_cast<ConvLayerParam *>(param_);
     auto input             = inputs[0];
@@ -140,10 +146,9 @@ Status MetalConvLayerCommon::Forward(const std::vector<Blob *> &inputs, const st
     const int goc         = dims_output[1] / group;
     const int gic          = dims_input[1] / group;
     if (group > 1 && ((gic % 4 != 0) || (goc % 4 != 0))) {
-        LOGD("convolution: channel per group must be 4x\n");
-        return Status(TNNERR_LAYER_ERR, "convolution: channel per group must be 4x");
+        LOGD("convolution common: channel per group must be 4x\n");
+        return Status(TNNERR_LAYER_ERR, "convolution common: channel per group must be 4x");
     }
-    
     auto context_impl = context_->getMetalContextImpl();
     auto encoder = [context_impl encoder];
     encoder.label = GetKernelLabel();
@@ -201,7 +206,7 @@ Status MetalConvLayerCommon::Forward(const std::vector<Blob *> &inputs, const st
     [encoder endEncoding];
     
     if (status == TNN_OK) {
-        [context_impl commit];
+        [context_impl commit:this->is_last];
         TNN_PRINT_ENCODER(context_, encoder, this);
     }
     return status;

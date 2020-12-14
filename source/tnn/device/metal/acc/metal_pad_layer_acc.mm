@@ -141,7 +141,7 @@ Status MetalPadLayerAcc::Forward(const std::vector<Blob *> &inputs,
     [encoder endEncoding];
     
     if (status == TNN_OK) {
-        [context_impl commit];
+        [context_impl commit:this->is_last];
         TNN_PRINT_ENCODER(context_, encoder, this);
     }
     return status;
