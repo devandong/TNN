@@ -184,10 +184,23 @@ Status ModelPacker::PackModel(std::string file_path) {
     if (magic_number > 0) {
         write_stream.write(reinterpret_cast<char *>(&magic_number), sizeof(uint32_t));
     }
+    // devandong: when a tnnmodel from a big model is used with a small tnnproto model(some layers have been removed),
+    // the dumped tnn model will contains more layer resources, some of the resources are for layers which are not in tnnproto.
+    // this will cause parsing error when using the dumped tnnmodel and the small tnnptoro.
+    std::set<std::string> layers_in_structure;
+    for (const auto &layer_info : net_struct->layers) {
+        const auto& layer_name = layer_info->name;
+        if (layers_in_structure.count(layer_name) != 0){
+            return Status(TNNERR_INVALID_MODEL, "invalid model: duplicate layer name");
+        }
+        layers_in_structure.insert(layer_name);
+    }
     res_header header;
     header.layer_cnt_ = 0;
     for (const auto &item : net_resource->resource_map) {
-        if (item.second != nullptr) {
+        auto count = layers_in_structure.count(item.first);
+        if (item.second != nullptr && count > 0) {
+            printf("resource map:%s\n", item.first.c_str());
             header.layer_cnt_++;
         }
     }
@@ -228,6 +241,7 @@ Status ModelPacker::PackModel(std::string file_path) {
             result = PackResource(resource_map, layer_name, serializer, write_stream);
             printf("===== pack resource for:%s\n", layer_name.c_str());
             if (result != TNN_OK) {
+                printf("===== pack resource for:%s Error!\n", layer_name.c_str());
                 write_stream.close();
                 return result;
             }

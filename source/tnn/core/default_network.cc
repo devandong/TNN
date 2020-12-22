@@ -80,6 +80,13 @@ Status DefaultNetwork::Init(NetworkConfig &net_config, ModelConfig &model_config
 
     NetStructure *net_structure = default_interpreter->GetNetStructure();
     NetResource *net_resource   = default_interpreter->GetNetResource();
+    {
+        int resource_map_cnt = 0;
+        for(const auto& item : net_resource->resource_map) {
+            if (item.second != nullptr) resource_map_cnt++;
+        }
+        printf("===== %d items in resourcemap!\n", resource_map_cnt);
+    }
 
     if (net_structure == NULL || net_resource == NULL) {
         LOGE("ERROR: network_ is nil, network_type may not support\n");
@@ -192,8 +199,8 @@ Status DefaultNetwork::InitLayers(NetStructure *net_structure, NetResource *net_
         // generate resource if null
         if (net_resource->resource_map.count(layer_name) == 0) {
             do {
-            if (layer_name != "Conv_final_x" && layer_name != "Conv_final_y")
-                break;
+            //if (layer_name != "Conv_final_x" && layer_name != "Conv_final_y")
+            //    break;
             LayerParam *layer_param  = layer_info->param.get();
             LayerResource *layer_res = nullptr;
             GenerateRandomResource(type, layer_param, &layer_res, inputs);
