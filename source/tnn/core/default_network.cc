@@ -111,6 +111,7 @@ Status DefaultNetwork::Init(NetworkConfig &net_config, ModelConfig &model_config
      * The optimization process may change the network structure accoundingly.
      * eg. fuse conv+bn, conv+relu.
      */
+    /*
     {
         // use mutex to protect net_resource and net_structure in multi-thread
         std::unique_lock<std::mutex> lck(optimize_mtx_);
@@ -119,7 +120,7 @@ Status DefaultNetwork::Init(NetworkConfig &net_config, ModelConfig &model_config
             return ret;
         }
     }
-
+    */
     blob_manager_ = new BlobManager(device_);
 
     ret = blob_manager_->Init(net_config, net_structure, inputs_shape, GetNetResourceDataType(net_resource));
@@ -192,7 +193,7 @@ Status DefaultNetwork::InitLayers(NetStructure *net_structure, NetResource *net_
         if (net_resource->resource_map.count(layer_name) == 0) {
             do {
             if (layer_name != "Conv_final_x" && layer_name != "Conv_final_y")
-            break;
+                break;
             LayerParam *layer_param  = layer_info->param.get();
             LayerResource *layer_res = nullptr;
             GenerateRandomResource(type, layer_param, &layer_res, inputs);
