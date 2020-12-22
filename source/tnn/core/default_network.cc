@@ -140,7 +140,7 @@ Status DefaultNetwork::Init(NetworkConfig &net_config, ModelConfig &model_config
     net_structure_ = net_structure;
 
     // devandong: save the model
-    // GenerateModel(*net_structure, *net_resource, "/Users/devandong/Desktop/", "123_merged");
+    GenerateModel(*net_structure, *net_resource, "/Users/devandong/Desktop/", "add_gaussian_blur");
 
     InputShapesMap input_shape_map;
     return Reshape(input_shape_map);
@@ -168,7 +168,6 @@ Status DefaultNetwork::InitLayers(NetStructure *net_structure, NetResource *net_
             auto ret  = UpdateBlobPrecision(layer_info, true, is_quantized_net, name, net_resource, &blob);
             RETURN_ON_NEQ(ret, TNN_OK);
         }
-
 #ifdef BENCHMARK
         LayerType type       = layer_info->type;
         BaseLayer *cur_layer = CreateLayer(type);
@@ -191,7 +190,6 @@ Status DefaultNetwork::InitLayers(NetStructure *net_structure, NetResource *net_
 
         // generate resource if null
         if (net_resource->resource_map.count(layer_name) == 0) {
-            // printf("===== Generate random resource for:%s\n", layer_name.c_str());
             LayerParam *layer_param  = layer_info->param.get();
             LayerResource *layer_res = nullptr;
             GenerateRandomResource(type, layer_param, &layer_res, inputs);

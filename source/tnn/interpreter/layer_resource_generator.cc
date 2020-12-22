@@ -28,6 +28,8 @@ std::map<LayerType, std::shared_ptr<LayerResourceGenerator>>& GetGlobalLayerReso
 Status GenerateRandomResource(LayerType type, LayerParam* param, LayerResource** resource, std::vector<Blob*>& inputs) {
     auto& layer_resource_generator_map = GetGlobalLayerResourceGeneratorMap();
     if (layer_resource_generator_map.count(type) > 0) {
+        auto layer_name = param->name;
+        printf("===== Generate random resource for:%s\n", layer_name.c_str());
         auto generator = layer_resource_generator_map[type]->GenLayerResource(param, resource, inputs);
     }
     return TNN_OK;
