@@ -190,16 +190,20 @@ Status DefaultNetwork::InitLayers(NetStructure *net_structure, NetResource *net_
 
         // generate resource if null
         if (net_resource->resource_map.count(layer_name) == 0) {
+            do {
+            if (layer_name != "Conv_final_x" && layer_name != "Conv_final_y")
+            break;
             LayerParam *layer_param  = layer_info->param.get();
             LayerResource *layer_res = nullptr;
             GenerateRandomResource(type, layer_param, &layer_res, inputs);
             net_resource->resource_map[layer_name] = std::shared_ptr<LayerResource>(layer_res);
+            } while(0);
         }
-
         cur_layer->InferShapeAhead(inputs, outputs_for_shape, layer_info->param.get(),
                                    net_resource->resource_map[layer_name].get());
 
         delete cur_layer;
+        
 #endif
 
         for (auto name : output_names) {
