@@ -226,6 +226,7 @@ Status ModelPacker::PackModel(std::string file_path) {
         // save layer resource
         if (resource_map.find(layer_name) != resource_map.end() && resource_map.find(layer_name)->second != nullptr) {
             result = PackResource(resource_map, layer_name, serializer, write_stream);
+            printf("===== pack resource for:%s\n", layer_name.c_str());
             if (result != TNN_OK) {
                 write_stream.close();
                 return result;
