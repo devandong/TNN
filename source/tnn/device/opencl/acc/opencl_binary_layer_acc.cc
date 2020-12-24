@@ -119,6 +119,10 @@ Status OpenCLBinaryLayerAcc::Reshape(const std::vector<Blob *> &inputs, const st
         // kernel: BinaryHW
         execute_units_[0].ocl_kernel.setArg(kernel_arg_idx_++, output_dims[2]);
         execute_units_[0].ocl_kernel.setArg(kernel_arg_idx_++, output_dims[3]);
+    } else if (broadcast_param_.input0_broadcast_type == BroadcastTypeWidth ||
+               broadcast_param_.input1_broadcast_type == BroadcastTypeWidth) {
+        // kernel: BinaryWidth
+        execute_units_[0].ocl_kernel.setArg(kernel_arg_idx_++, output_dims[3]);
     }
     // set output
     execute_units_[0].ocl_kernel.setArg(kernel_arg_idx_++, *((cl::Image *)outputs[0]->GetHandle().base));
@@ -138,6 +142,8 @@ std::string OpenCLBinaryLayerAcc::GetKernelName(const MultidirBroadcastLayerPara
     } else if (param.input0_broadcast_type == BroadcastTypeHeightWidth ||
                param.input1_broadcast_type == BroadcastTypeHeightWidth) {
         return "BinaryHW";
+    } else if (param.input0_broadcast_type == BroadcastTypeWidth || param.input1_broadcast_type == BroadcastTypeWidth) {
+        return "BinaryWidth";
     } else {
         return "BinaryElementWise";
     }
@@ -176,7 +182,7 @@ Status OpenCLBinaryLayerAcc::ConvertParam(float *param_data_ptr, std::vector<int
     int climage_w             = UP_DIV(param_dims[1], 4) * param_dims[3];
     int climage_h             = param_dims[0] * param_dims[2];
     cl_channel_type data_type = CL_FLOAT;
-    if (opencl_runtime->GetFp16Enable())
+    if (opencl_runtime->GetPrecision() != PRECISION_HIGH)
         data_type = CL_HALF_FLOAT;
     cl::Image2D *image = new cl::Image2D(*opencl_runtime->Context(), CL_MEM_READ_WRITE,
                                          cl::ImageFormat(CL_RGBA, data_type), climage_w, climage_h, 0, nullptr, &ret);

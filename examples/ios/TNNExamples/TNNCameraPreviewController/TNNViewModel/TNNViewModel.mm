@@ -34,8 +34,24 @@
     return {};
 }
 
+<<<<<<< HEAD
+=======
+-(ImageInfo)getImage:(std::shared_ptr<TNNSDKOutput>)sdk_output {
+    return {};
+}
+
+>>>>>>> origin/feature_demo_blazepose
 -(NSString*)labelForObject:(std::shared_ptr<ObjectInfo>)object {
     [NSException raise:NSInvalidArgumentException format:@"subclass must overide the func labelForObject"];
     return nil;
 }
+<<<<<<< HEAD
+=======
+
+- (void)setupCustomView:(UIView *)view layoutHeight:(NSLayoutConstraint *)viewLayoutHeight {
+    if (view && viewLayoutHeight) {
+        viewLayoutHeight.constant = 0;
+    }
+}
+>>>>>>> origin/feature_demo_blazepose
 @end

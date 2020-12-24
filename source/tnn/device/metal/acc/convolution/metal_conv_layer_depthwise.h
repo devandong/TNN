@@ -34,7 +34,7 @@ public:
     Status AllocateBufferParam(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs);
     
 public:
-    virtual std::string KernelName();
+    virtual std::string KernelName(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs);
     virtual Status SetKernelEncoderParam(
                                          id<MTLComputeCommandEncoder> encoder,
                                          const std::vector<Blob *> &inputs,
@@ -42,6 +42,13 @@ public:
     virtual Status ComputeThreadSize(const std::vector<Blob *> &inputs,
                                      const std::vector<Blob *> &outputs,
                                      MTLSize &size);
+    virtual Status ComputeThreadgroupSize(const std::vector<Blob *> &inputs,
+                                         const std::vector<Blob *> &outputs,
+                                                           MTLSize &size);
+private:
+    // flags indicating if specialized configs are met
+    bool k51s1d1_ = false;
+    bool k15s1d1_ = false;
 };
 
 }  // namespace TNN_NS

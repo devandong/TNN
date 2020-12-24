@@ -9,8 +9,9 @@ SHARED_LIB="ON"
 ARM="ON"
 OPENMP="ON"
 OPENCL="ON"
-if [ -z "$NPU" ]; then
-    NPU="OFF"
+#HUAWEI_NPU="ON"
+if [ -z "$HUAWEI_NPU" ]; then
+    HUAWEI_NPU="OFF"
 fi
 BENMARK_MODE="OFF"
 DEBUG="OFF"
@@ -58,7 +59,24 @@ fi
 if [ -z $TNN_ROOT_PATH ]
 then
     TNN_ROOT_PATH=$(cd `dirname $0`; pwd)/..
+    echo $TNN_ROOT_PATH
 fi
+
+if [ "$HUAWEI_NPU" == "ON" ]
+then
+    echo "NPU Enable"
+    # set c++ shared
+    STL="c++_shared"
+    #start to cp
+    if [ ! -d ${TNN_ROOT_PATH}/third_party/huawei_npu/cpp_lib/ ]; then
+         mkdir -p ${TNN_ROOT_PATH}/third_party/huawei_npu/cpp_lib/
+    fi
+    mkdir -p ${TNN_ROOT_PATH}/third_party/huawei_npu/cpp_lib/armeabi-v7a
+    mkdir -p ${TNN_ROOT_PATH}/third_party/huawei_npu/cpp_lib/arm64-v8a
+    cp $ANDROID_NDK/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++_shared.so ${TNN_ROOT_PATH}/third_party/huawei_npu/cpp_lib/armeabi-v7a/
+    cp $ANDROID_NDK/sources/cxx-stl/llvm-libc++/libs/arm64-v8a/libc++_shared.so ${TNN_ROOT_PATH}/third_party/huawei_npu/cpp_lib/arm64-v8a/
+fi
+
 TNN_VERSION_PATH=$TNN_ROOT_PATH/scripts/version
 echo $TNN_ROOT_PATH
 echo $TNN_VERSION_PATH
@@ -93,7 +111,7 @@ cmake ${TNN_ROOT_PATH} \
       -DANDROID_TOOLCHAIN=clang \
       -DBUILD_FOR_ANDROID_COMMAND=true \
       -DTNN_ARM_ENABLE:BOOL=$ARM \
-      -DTNN_NPU_ENABLE:BOOL=$NPU \
+      -DTNN_HUAWEI_NPU_ENABLE:BOOL=$HUAWEI_NPU \
       -DTNN_OPENCL_ENABLE:BOOL=$OPENCL \
       -DTNN_BENCHMARK_MODE:BOOL=$BENMARK_MODE \
       -DTNN_TEST_ENABLE:BOOL=ON \
@@ -126,7 +144,7 @@ cmake ${TNN_ROOT_PATH} \
       -DANDROID_TOOLCHAIN=clang \
       -DBUILD_FOR_ANDROID_COMMAND=true \
       -DTNN_ARM_ENABLE:BOOL=$ARM \
-      -DTNN_NPU_ENABLE:BOOL=$NPU \
+      -DTNN_HUAWEI_NPU_ENABLE:BOOL=$HUAWEI_NPU \
       -DTNN_OPENCL_ENABLE:BOOL=$OPENCL \
       -DTNN_TEST_ENABLE:BOOL=ON \
       -DTNN_BENCHMARK_MODE:BOOL=$BENMARK_MODE \
@@ -164,8 +182,8 @@ else
     cp build64/libTNN.a release/arm64-v8a
 fi
 cp -r ${TNN_ROOT_PATH}/include release
-if [ $NPU = "ON" ]; then
-    cp $TNN_BUILD_PATH/../third_party/npu/hiai_ddk_latest/armeabi-v7a/* release/armeabi-v7a/
-    cp $TNN_BUILD_PATH/../third_party/npu/hiai_ddk_latest/arm64-v8a/* release/arm64-v8a/
+if [  "$HUAWEI_NPU" == "ON" ]; then
+    cp ${TNN_ROOT_PATH}/third_party/huawei_npu/hiai_ddk_latest/armeabi-v7a/* release/armeabi-v7a/
+    cp ${TNN_ROOT_PATH}/third_party/huawei_npu/hiai_ddk_latest/arm64-v8a/* release/arm64-v8a/
 fi
 echo "build done!"

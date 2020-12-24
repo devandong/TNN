@@ -9,7 +9,7 @@
 //
 // Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
 #include "tnn/core/common.h"
@@ -56,8 +56,7 @@ void ParseProtoFile(char* proto_buffer, size_t proto_buffer_length) {
     proto_buffer[fill] = '\0';
 }
 
-int InitModelConfig(ModelConfig& model_config, std::string proto_file,
-                    std::string model_file) {
+int InitModelConfig(ModelConfig& model_config, std::string proto_file, std::string model_file) {
     FILE* fp = fopen(proto_file.c_str(), "r");
     if (fp == NULL) {
         printf("invalid proto file\n");
@@ -83,15 +82,15 @@ int InitModelConfig(ModelConfig& model_config, std::string proto_file,
     delete[] buffer;
 
     {
-      std::ifstream model_stream(model_file);
-      if (!model_stream.is_open() || !model_stream.good()) {
-        printf("read model_file failed!\n");
-        return -1;
-      }
-      std::string model_content = std::string((std::istreambuf_iterator<char>(model_stream)),
-                                              std::istreambuf_iterator<char>());
+        std::ifstream model_stream(model_file);
+        if (!model_stream.is_open() || !model_stream.good()) {
+            printf("read model_file failed!\n");
+            return -1;
+        }
+        std::string model_content =
+            std::string((std::istreambuf_iterator<char>(model_stream)), std::istreambuf_iterator<char>());
 
-      model_config.params.push_back(model_content);
+        model_config.params.push_back(model_content);
     }
 
     return 0;
@@ -154,10 +153,32 @@ int ImportDataSet(DataSet& dataset, std::string folder_path) {
     return 0;
 }
 
+bool CheckNumberString(std::string num_str) {
+    const char* num_char = num_str.c_str();
+
+    for (int i = 0; i < num_str.length(); ++i) {
+        if (!(num_char[i] >= '0' && num_char[i] <= '9') && num_char[i] != '.') {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool CheckFileName(std::string name) {
+    std::ofstream write_stream;
+    write_stream.open(name);
+    if (!write_stream || !write_stream.is_open() || !write_stream.good()) {
+        write_stream.close();
+        return false;
+    }
+    write_stream.close();
+    return true;
+}
+
 void PrintConfig() {
     printf(
-        "usage:\n./quantization_cmd [-h] [-p] [-m] [-i] [-b] [-w] [-n] [-s] "
-        "[-c]\n"
+        "usage:\n./quantization_cmd [-h] [-p] <proto file> [-m] <model file> [-i] <input folder> [-b] <val> [-w] <val> "
+        "[-n] <val> [-s] <val> [-t] <val> [-o] <output_name>\n"
         "\t-h, --help        \t show this message\n"
         "\t-p, --proto       \t(require) tnn proto file name\n"
         "\t-m, --model       \t(require) tnn model file name\n"
@@ -175,8 +196,11 @@ void PrintConfig() {
         "input, ie, "
         "1.0,1.0,1.0 \n"
         "\t\tformula: y = (x - bias) * scale\n"
-        "\t-c, --merge_channel\t(optional) merge blob channel when quantize "
-        "blob\n");
+        "\t-t, --merge_type\t(optional) merge blob/weights channel when quantize blob/weights\n"
+        "\t\t0: per-channel mode  (default)\n"
+        "\t\t1: mix mode          weight: per-channel  blob: per-tensor\n"
+        "\t\t2: per-tersor mode\n"
+        "\t-o, --output       \t(optional) specify the name of output\n");
 }
 
 int main(int argc, char* argv[]) {
@@ -184,27 +208,23 @@ int main(int argc, char* argv[]) {
     std::string proto_file_name;
     std::string model_file_name;
     std::string input_path;
+    std::string output_name = "model";
 
     CalibrationParam cali_params;
-    cali_params.blob_quantize_method    = MIN_MAX;
-    cali_params.weights_quantize_method = MIN_MAX;
-    cali_params.merge_blob_channel      = false;
-    cali_params.input_bias              = {0, 0, 0, 0};
-    cali_params.input_scale             = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    struct option long_options[] = {
-        {"proto", required_argument, 0, 'p'},
-        {"model", required_argument, 0, 'm'},
-        {"input_path", required_argument, 0, 'i'},
-        {"blob_method", required_argument, 0, 'b'},
-        {"weight_method", required_argument, 0, 'w'},
-        {"bias", required_argument, 0, 'n'},
-        {"scale", required_argument, 0, 's'},
-        {"merge_channel", no_argument, 0, 'c'},
-        {"help", no_argument, 0, 'h'},
-        {0, 0, 0, 0}};
+    struct option long_options[] = {{"proto", required_argument, 0, 'p'},
+                                    {"model", required_argument, 0, 'm'},
+                                    {"input_path", required_argument, 0, 'i'},
+                                    {"blob_method", required_argument, 0, 'b'},
+                                    {"weight_method", required_argument, 0, 'w'},
+                                    {"bias", required_argument, 0, 'n'},
+                                    {"scale", required_argument, 0, 's'},
+                                    {"merge_type", no_argument, 0, 't'},
+                                    {"output", required_argument, 0, 'o'},
+                                    {"help", no_argument, 0, 'h'},
+                                    {0, 0, 0, 0}};
 
-    const char* optstring = "p:m:i:b:w:n:s:ch";
+    const char* optstring = "p:m:i:b:w:n:s:t:o:h";
 
     if (argc == 1) {
         PrintConfig();
@@ -231,13 +251,11 @@ int main(int argc, char* argv[]) {
                 break;
             case 'b':
                 printf("blob quantize method: %s\n", optarg);
-                cali_params.blob_quantize_method =
-                    (CalibrationMethod)atoi(optarg);
+                cali_params.blob_quantize_method = (CalibrationMethod)atoi(optarg);
                 break;
             case 'w':
                 printf("weight quantize method: %s\n", optarg);
-                cali_params.weights_quantize_method =
-                    (CalibrationMethod)atoi(optarg);
+                cali_params.weights_quantize_method = (CalibrationMethod)atoi(optarg);
                 break;
             case 'n': {
                 printf("bias: %s\n", optarg);
@@ -245,6 +263,10 @@ int main(int argc, char* argv[]) {
                 SplitUtils::SplitStr(optarg, array, ",");
                 cali_params.input_bias.clear();
                 for (auto s : array) {
+                    if (!CheckNumberString(s)) {
+                        printf("invalid bias value: %s\n", s.c_str());
+                        return -1;
+                    }
                     cali_params.input_bias.push_back(atof(s.c_str()));
                 }
             } break;
@@ -254,12 +276,37 @@ int main(int argc, char* argv[]) {
                 SplitUtils::SplitStr(optarg, array, ",");
                 cali_params.input_scale.clear();
                 for (auto s : array) {
+                    if (!CheckNumberString(s)) {
+                        printf("invalid scale value: %s\n", s.c_str());
+                        return -1;
+                    }
                     cali_params.input_scale.push_back(atof(s.c_str()));
                 }
             } break;
-            case 'c':
-                printf("merge channel: true\n");
-                cali_params.merge_blob_channel = true;
+            case 't': {
+                printf("merge type: %s\n", optarg);
+                int merge_type = atoi(optarg);
+                if (0 == merge_type) {
+                    cali_params.merge_blob_channel    = false;
+                    cali_params.merge_weights_channel = false;
+                } else if (1 == merge_type) {
+                    cali_params.merge_blob_channel    = true;
+                    cali_params.merge_weights_channel = false;
+                } else if (2 == merge_type) {
+                    cali_params.merge_blob_channel    = true;
+                    cali_params.merge_weights_channel = true;
+                } else {
+                    cali_params.merge_blob_channel    = false;
+                    cali_params.merge_weights_channel = false;
+                }
+            } break;
+            case 'o':
+                printf("output name: %s\n", optarg);
+                output_name = optarg;
+                if (!CheckFileName(output_name + ".quantized.tnnproto")) {
+                    printf("invaild output name!\n");
+                    return 0;
+                }
                 break;
             case 'h':
             case '?':
@@ -301,10 +348,9 @@ int main(int argc, char* argv[]) {
         printf("calibration run falied!\n");
         return -1;
     }
-    status = calibration.Serialize("model_quantized.tnnproto",
-                                   "model_quantized.tnnmodel");
+    status = calibration.Serialize(output_name + ".quantized.tnnproto", output_name + ".quantized.tnnmodel");
     if (status != TNN_OK) {
-        printf("calibration serialize falied!\n");
+        printf("calibration serialize falied! (%s)\n", status.description().c_str());
         return -1;
     }
     printf("quantize model success!\n");

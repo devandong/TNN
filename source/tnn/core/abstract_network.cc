@@ -24,17 +24,22 @@ Status AbstractNetwork::ForwardWithCallback(BlobStatisticCallback before, BlobSt
 }
 #endif  // end of FORWARD_CALLBACK_ENABLE
 
+Status AbstractNetwork::ShareCommandQueue(AbstractNetwork *network) {
+    LOGE("Subclass of AbstractNetwork must implement this func ShareCommandQueue\n");
+    return Status(TNNERR_COMMON_ERROR, "Subclass of AbstractNetwork must implement this func ShareCommandQueue");
+}
+
 Status AbstractNetwork::SetCpuNumThreads(int num_threads) {
     return TNN_OK;
 }
 
 #if TNN_PROFILE
 void AbstractNetwork::StartProfile() {
-    LOGE("subclass should implement the func: StartProfile\n");
+    LOGI("subclass should implement the func: StartProfile\n");
 }
 
 std::shared_ptr<ProfileResult> AbstractNetwork::FinishProfile() {
-    LOGE("subclass should implement the func: FinishProfile\n");
+    LOGI("subclass should implement the func: FinishProfile\n");
     return std::make_shared<ProfileResult>();
 }
 #endif

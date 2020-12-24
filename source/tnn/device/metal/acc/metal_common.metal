@@ -31,6 +31,7 @@ typedef float3x4 ftype3x4;
 typedef float4x2 ftype4x2;
 typedef float4x3 ftype4x3;
 typedef float4x4 ftype4x4;
+#define FTYPE_MAX MAXFLOAT
 #else
 typedef half     ftype;
 typedef half2    ftype2;
@@ -45,6 +46,7 @@ typedef half3x4  ftype3x4;
 typedef half4x2  ftype4x2;
 typedef half4x3  ftype4x3;
 typedef half4x4  ftype4x4;
+#define FTYPE_MAX MAXHALF
 #endif
 
 
@@ -64,10 +66,12 @@ inline ftype4 prelu(ftype4 x, ftype4 slop) {
 
 inline ftype4 activate(ftype4 value, int type) {
     switch (type) {
-        case 1: // Relu see layer_param.h
+        case 0x0001: // Relu see layer_param.h
             return max(value, Zero4);
-        case 2: // Relu6 see layer_param.h
+        case 0x0002: // Relu6 see layer_param.h
             return clamp(value, Zero4, Six4);
+        case 0x0100: // Sigmoid_Mul see layer_param.h
+            return One4 / (One4 + exp(-value)) * value;
         default: // None
             return value;
     }

@@ -181,7 +181,8 @@ tags
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -486,6 +487,8 @@ lint/tmp/
 
 #model
 model/
+# opencl generated code
+opencl_program.cc
 
 #xcuserdata
 *xcuserdata/

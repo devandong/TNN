@@ -13,8 +13,15 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.tencent.tnn.demo.ObjectDetector;
+<<<<<<< HEAD
 import com.tencent.tnn.demo.FileUtils;
 import com.tencent.tnn.demo.Helper;
+=======
+import com.tencent.tnn.demo.FpsCounter;
+import com.tencent.tnn.demo.FileUtils;
+import com.tencent.tnn.demo.Helper;
+import com.tencent.tnn.demo.ObjectInfo;
+>>>>>>> origin/feature_demo_blazepose
 import com.tencent.tnn.demo.R;
 import com.tencent.tnn.demo.common.component.CameraSetting;
 import com.tencent.tnn.demo.common.component.DrawView;
@@ -49,13 +56,26 @@ public class StreamObjectDetectFragment extends BaseFragment {
 
     private ObjectDetector mObjectDetector = new ObjectDetector();
     private boolean mIsDetectingObject = false;
+<<<<<<< HEAD
+=======
+    private FpsCounter mFpsCounter = new FpsCounter();
+    private boolean mIsCountFps = false;
+>>>>>>> origin/feature_demo_blazepose
 
     private ToggleButton mGPUSwitch;
     private boolean mUseGPU = false;
     //add for npu
+<<<<<<< HEAD
     private ToggleButton mNPUswitch;
     private boolean mUseNPU = false;
     private TextView NpuTextView;
+=======
+    private ToggleButton mHuaweiNPUswitch;
+    private boolean mUseHuaweiNpu = false;
+    private TextView HuaweiNpuTextView;
+
+    private boolean mDeviceSwiched = false;
+>>>>>>> origin/feature_demo_blazepose
 
     /**********************************     Get Preview Advised    **********************************/
 
@@ -104,14 +124,24 @@ public class StreamObjectDetectFragment extends BaseFragment {
     }
     private void onSwichGPU(boolean b)
     {
+<<<<<<< HEAD
         if (b && mNPUswitch.isChecked()) {
             mNPUswitch.setChecked(false);
             mUseNPU = false;
+=======
+        if (b && mHuaweiNPUswitch.isChecked()) {
+            mHuaweiNPUswitch.setChecked(false);
+            mUseHuaweiNpu = false;
+>>>>>>> origin/feature_demo_blazepose
         }
         mUseGPU = b;
         TextView result_view = (TextView)$(R.id.result);
         result_view.setText("");
+<<<<<<< HEAD
         restartCamera();
+=======
+        mDeviceSwiched = true;
+>>>>>>> origin/feature_demo_blazepose
     }
 
     private void onSwichNPU(boolean b)
@@ -120,10 +150,17 @@ public class StreamObjectDetectFragment extends BaseFragment {
             mGPUSwitch.setChecked(false);
             mUseGPU = false;
         }
+<<<<<<< HEAD
         mUseNPU = b;
         TextView result_view = (TextView)$(R.id.result);
         result_view.setText("");
         restartCamera();
+=======
+        mUseHuaweiNpu = b;
+        TextView result_view = (TextView)$(R.id.result);
+        result_view.setText("");
+        mDeviceSwiched = true;
+>>>>>>> origin/feature_demo_blazepose
     }
 
     private void clickBack() {
@@ -135,7 +172,11 @@ public class StreamObjectDetectFragment extends BaseFragment {
     @Override
     public void setFragmentView() {
         Log.d(TAG, "setFragmentView");
+<<<<<<< HEAD
         setView(R.layout.fragment_streamfacedetector);
+=======
+        setView(R.layout.fragment_stream_detector);
+>>>>>>> origin/feature_demo_blazepose
         setTitleGone();
         $$(R.id.gpu_switch);
         $$(R.id.back_rl);
@@ -148,17 +189,29 @@ public class StreamObjectDetectFragment extends BaseFragment {
         });
 
         $$(R.id.npu_switch);
+<<<<<<< HEAD
         mNPUswitch = $(R.id.npu_switch);
         mNPUswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+=======
+        mHuaweiNPUswitch = $(R.id.npu_switch);
+        mHuaweiNPUswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+>>>>>>> origin/feature_demo_blazepose
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 onSwichNPU(b);
             }
         });
+<<<<<<< HEAD
         NpuTextView = $(R.id.npu_text);
         if (!NpuEnable) {
             NpuTextView.setVisibility(View.INVISIBLE);
             mNPUswitch.setVisibility(View.INVISIBLE);
+=======
+        HuaweiNpuTextView = $(R.id.npu_text);
+        if (!NpuEnable) {
+            HuaweiNpuTextView.setVisibility(View.INVISIBLE);
+            mHuaweiNPUswitch.setVisibility(View.INVISIBLE);
+>>>>>>> origin/feature_demo_blazepose
         }
         init();
     }
@@ -251,7 +304,11 @@ public class StreamObjectDetectFragment extends BaseFragment {
 
 
     public void openCamera() {
+<<<<<<< HEAD
         openCamera(Camera.CameraInfo.CAMERA_FACING_FRONT);
+=======
+        openCamera(Camera.CameraInfo.CAMERA_FACING_BACK);
+>>>>>>> origin/feature_demo_blazepose
     }
 
     private void openCamera(int cameraFacing) {
@@ -292,18 +349,37 @@ public class StreamObjectDetectFragment extends BaseFragment {
                     mCameraHeight = parameters.getPreviewSize().height;
                     String modelPath = initModel();
                     int device = 0;
+<<<<<<< HEAD
                     if (mUseNPU) {
+=======
+                    if (mUseHuaweiNpu) {
+>>>>>>> origin/feature_demo_blazepose
                         device = 2;
                     } else if (mUseGPU) {
                         device = 1;
                     }
+<<<<<<< HEAD
                     int ret = mObjectDetector.init(modelPath, NET_H_INPUT, NET_W_INPUT, 0.975f, 0.23f, 1, device);
+=======
+                    int ret = mObjectDetector.init(modelPath, NET_W_INPUT, NET_H_INPUT, 0.7f, 0.3f, -1, device);
+>>>>>>> origin/feature_demo_blazepose
                     if (ret == 0) {
                         mIsDetectingObject = true;
                     } else {
                         mIsDetectingObject = false;
                         Log.e(TAG, "Face detector init failed " + ret);
                     }
+<<<<<<< HEAD
+=======
+
+                    ret = mFpsCounter.init();
+                    if (ret == 0) {
+                        mIsCountFps = true;
+                    } else {
+                        mIsCountFps = false;
+                        Log.e(TAG, "Fps Counter init failed " + ret);
+                    }
+>>>>>>> origin/feature_demo_blazepose
                 } else {
                     Log.e(TAG, "Failed to init camera");
                 }
@@ -323,17 +399,63 @@ public class StreamObjectDetectFragment extends BaseFragment {
                     public void onPreviewFrame(byte[] data, Camera camera) {
                         if (mIsDetectingObject) {
                             Camera.Parameters mCameraParameters = camera.getParameters();
+<<<<<<< HEAD
                             ObjectDetector.ObjectInfo[] objectInfoList = mObjectDetector.detectFromStream(data, mCameraParameters.getPreviewSize().width, mCameraParameters.getPreviewSize().height, mRotate);
+=======
+                            ObjectInfo[] objectInfoList;
+                            // reinit
+                            if (mDeviceSwiched) {
+                                String modelPath = getActivity().getFilesDir().getAbsolutePath();
+                                int device = 0;
+                                if (mUseHuaweiNpu) {
+                                    device = 2;
+                                } else if (mUseGPU) {
+                                    device = 1;
+                                }
+                                int ret = mObjectDetector.init(modelPath, NET_W_INPUT, NET_H_INPUT, 0.7f, 0.3f, -1, device);
+                                if (ret == 0) {
+                                    mIsDetectingObject = true;
+                                    mFpsCounter.init();
+                                } else {
+                                    mIsDetectingObject = false;
+                                    Log.e(TAG, "Face detector init failed " + ret);
+                                }
+                                mDeviceSwiched = false;
+                            }
+                            if (mIsCountFps) {
+                                mFpsCounter.begin("ObjectDetect");
+                            }
+                            objectInfoList = mObjectDetector.detectFromStream(data, mCameraParameters.getPreviewSize().width, mCameraParameters.getPreviewSize().height, mDrawView.getWidth(), mDrawView.getHeight(), mRotate);
+                            if (mIsCountFps) {
+                                mFpsCounter.end("ObjectDetect");
+                                double fps = mFpsCounter.getFps("ObjectDetect");
+                                String monitorResult = "device: ";
+                                if (mUseGPU) {
+                                    monitorResult += "opencl\n";
+                                } else if (mUseHuaweiNpu) {
+                                    monitorResult += "huawei_npu\n";
+                                } else {
+                                    monitorResult += "arm\n";
+                                }
+                                monitorResult += "fps: " + String.format("%.02f", fps);
+                                TextView monitor_result_view = (TextView)$(R.id.monitor_result);
+                                monitor_result_view.setText(monitorResult);
+                            }
+>>>>>>> origin/feature_demo_blazepose
                             Log.i(TAG, "detect from stream ret " + objectInfoList);
                             int objectCount = 0;
                             if (objectInfoList != null) {
                                 objectCount = objectInfoList.length;
                             }
+<<<<<<< HEAD
                             mDrawView.addObjectRect(objectInfoList, mCameraParameters.getPreviewSize().height, mCameraParameters.getPreviewSize().width);
 
                             String result = "object count: " + objectCount + " " + Helper.getBenchResult();
                             TextView result_view = (TextView)$(R.id.result);
                             result_view.setText(result);
+=======
+                            mDrawView.addObjectRect(objectInfoList,  ObjectDetector.label_list);
+>>>>>>> origin/feature_demo_blazepose
                         }
                         else {
                             Log.i(TAG,"No object");

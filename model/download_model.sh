@@ -75,6 +75,12 @@ download_model \
     "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/blazeface/blazeface.tnnmodel" \
     "blazeface"
 
+# download blazeface anchor file
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/blazeface/blazeface_anchors.txt" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/blazeface/blazeface_anchors.txt" \
+    "blazeface"
+
 # download mobilenet_v2-ssd tnn model
   download_model \
     "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/mobilenet_v2-ssd/mobilenetv2_ssd.tnnproto" \
@@ -86,3 +92,63 @@ download_model \
     "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/yolov5/yolov5s-permute.tnnproto" \
     "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/yolov5/yolov5s.tnnmodel" \
     "yolov5"
+
+# download facemesh tnn model
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/face_mesh/face_mesh.tnnproto" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/face_mesh/face_mesh.tnnmodel" \
+    "face_mesh"
+
+# download YouTu face alignment phase1 tnn model
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/youtu_face_alignment/youtu_face_alignment_phase1.tnnproto" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/youtu_face_alignment/youtu_face_alignment_phase1.tnnmodel" \
+    "youtu_face_alignment"
+
+# download YouTu face alignment phase2 tnn model
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/youtu_face_alignment/youtu_face_alignment_phase2.tnnproto" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/youtu_face_alignment/youtu_face_alignment_phase2.tnnmodel" \
+    "youtu_face_alignment"
+
+# download YouTu face alignment pts file
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/youtu_face_alignment/youtu_mean_pts_phase1.txt" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/youtu_face_alignment/youtu_mean_pts_phase2.txt" \
+    "youtu_face_alignment"
+
+# download hair segmentation tnn model
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/hair_segmentation/segmentation.tnnproto" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/hair_segmentation/segmentation.tnnmodel" \
+    "hair_segmentation"
+
+# download skeleton big tnn model
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/skeleton/skeleton_big.tnnproto" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/skeleton/skeleton.tnnmodel" \
+    "skeleton"
+
+# download skeleton medium and small tnn models
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/skeleton/skeleton_middle.tnnproto" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/skeleton/skeleton_small.tnnproto" \
+    "skeleton"
+
+# download blazepose detection model
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/blazepose/pose_detection.tnnproto" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/blazepose/pose_detection.tnnmodel" \
+    "blazepose"
+
+# download blazepose upper-body landmark model
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/blazepose/pose_landmark_upper_body.tnnproto" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/blazepose/pose_landmark_upper_body.tnnmodel" \
+    "blazepose"
+
+# download blazepose full-body landmark model
+  download_model \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/blazepose/pose_landmark_full_body.tnnproto" \
+    "https://raw.githubusercontent.com/darrenyao87/tnn-models/master/model/blazepose/pose_landmark_full_body.tnnmodel" \
+    "blazepose"

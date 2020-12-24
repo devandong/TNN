@@ -30,8 +30,10 @@ DeviceType ConvertDeviceType(std::string device_type) {
         return DEVICE_X86;
     } else if ("NAIVE" == device_type) {
         return DEVICE_NAIVE;
-    } else if ("NPU" == device_type) {
-        return DEVICE_NPU;
+    } else if ("HUAWEI_NPU" == device_type) {
+        return DEVICE_HUAWEI_NPU;
+    } else if ("RKNPU" == device_type) {
+        return DEVICE_RK_NPU;
     } else {
         return DEVICE_ARM;
     }
@@ -58,8 +60,10 @@ NetworkType ConvertNetworkType(std::string network_type) {
         return NETWORK_TYPE_SNPE;
     } else if ("COREML" == network_type) {
         return NETWORK_TYPE_COREML;
-    } else if ("NPU" == network_type) {
-        return NETWORK_TYPE_NPU;
+    } else if ("HUAWEI_NPU" == network_type) {
+        return NETWORK_TYPE_HUAWEI_NPU;
+    } else if ("RKNPU" == network_type) {
+        return NETWORK_TYPE_RK_NPU;
     } else {
         return NETWORK_TYPE_DEFAULT;
     }
@@ -73,8 +77,18 @@ Precision ConvertPrecision(std::string precision) {
     } else if ("LOW" == precision) {
         return PRECISION_LOW;
     } else {
+        return PRECISION_AUTO;
+    }
+}
+
+Precision SetPrecision(DeviceType dev, DataType dtype) {
+    if (DATA_TYPE_BFP16 == dtype) {
+        return PRECISION_LOW;
+    } else if (DATA_TYPE_FLOAT == dtype && dev == DEVICE_ARM) {
         return PRECISION_HIGH;
     }
+
+    return PRECISION_AUTO;
 }
 
 int CompareData(const float* ref_data, const float* result_data, size_t n, float ep) {
@@ -89,6 +103,39 @@ int CompareData(const float* ref_data, const float* result_data, size_t n, float
 
     return 0;
 }
+// for arm half check
+int CompareData(const float* ref_data, const float* result_data, size_t n, float ep, float dp) {
+    int relative_error_flag = 0;
+    for (unsigned long long i = 0; i < n; i++) {
+        float diff = static_cast<float>(fabs(result_data[i] - ref_data[i]));
+        float sum  = static_cast<float>(fabs(result_data[i]) + fabs(ref_data[i]));
+        if (fabs(diff / sum) > ep && fabs(diff) > dp) {
+            relative_error_flag = 1;
+            break;
+        }
+    }
+    // if relative error not pass, calculate cosine similarity
+    if (relative_error_flag == 0) {
+        return 0;
+    } else {
+        double sum_res = 0.f;
+        double sum_ref = 0.f;
+        double sum_dot = 0.f;
+        for (unsigned long long i = 0; i < n; i++) {
+            sum_res += result_data[i] * result_data[i];
+            sum_ref += ref_data[i] * ref_data[i];
+            sum_dot += result_data[i] * ref_data[i];
+        }
+        double cos_sim = sum_dot / (sqrt(sum_res) * sqrt(sum_ref));
+        if (cos_sim < 0.9999f) {
+            printf("ERROR COSINE SIMILARITY %.6f < 0.9999\n", cos_sim);
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
 int CompareData(const bfp16_t* ref_data, const bfp16_t* result_data, size_t n, float ep) {
     for (unsigned long long i = 0; i < n; i++) {
         float diff = static_cast<float>(fabs(float(result_data[i]) - float(ref_data[i])));
@@ -104,7 +151,7 @@ int CompareData(const bfp16_t* ref_data, const bfp16_t* result_data, size_t n, f
 
 int CompareData(const int8_t* ref_data, const int8_t* result_data, size_t n) {
     for (unsigned long long i = 0; i < n; i++) {
-        if (fabs(result_data[i] - ref_data[i]) > 1) {
+        if (abs(result_data[i] - ref_data[i]) > 1) {
             LOGE("ERROR AT %llu result %d ref %d\n", i, result_data[i], ref_data[i]);
             return -1;
         }
@@ -118,7 +165,7 @@ int CompareData(const uint8_t* ref_data, const uint8_t* result_data, int mat_cha
         int c = i % mat_channel;
         if (c >= channel)
             continue;
-        if (fabs(result_data[i] - ref_data[i]) > 1) {
+        if (abs(result_data[i] - ref_data[i]) > 1) {
             LOGE("ERROR AT %llu result %d ref %d\n", i, result_data[i], ref_data[i]);
             return -1;
         }

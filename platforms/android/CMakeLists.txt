@@ -22,13 +22,12 @@ endif()
 
 if(TNN_OPENCL_ENABLE)
     message(STATUS "Build TNN OpenCL")
-
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencl/include)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/source/device/opencl)
 endif()
 
-if(TNN_NPU_ENABLE)
+if(TNN_HUAWEI_NPU_ENABLE)
     message(STATUS "Build TNN NPU")
-    target_link_libraries(TNN hiai hiai_ir hiai_ir_build hcl)
-    include_directories(${PROJECT_SOURCE_DIR}/source/tnn/device/npu)
+    target_link_libraries(TNN hiai hiai_ir hiai_ir_build)
+    include_directories(${PROJECT_SOURCE_DIR}/source/tnn/device/huawei_npu)
 endif()

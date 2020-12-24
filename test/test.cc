@@ -39,7 +39,7 @@
 #include "tnn/utils/data_type_utils.h"
 #include "tnn/utils/dims_vector_utils.h"
 #include "tnn/utils/omp_utils.h"
-#include "tnn/utils/string_utils.h"
+#include "tnn/utils/string_utils_inner.h"
 
 int main(int argc, char* argv[]) {
     return TNN_NS::test::Run(argc, argv);
@@ -103,7 +103,7 @@ namespace test {
                     auto blob_converter = element.second;
                     blob_converter->ConvertFromMatAsync(*input_mat_map[name], input_params_map[name], command_queue);
                 }
-                ret = instance->ForwardAsync(nullptr);
+                instance->ForwardAsync(nullptr);
                  
                 for(auto element : output_converters_map) {
                     auto name = element.first;
@@ -127,13 +127,22 @@ namespace test {
                 for(auto element : input_converters_map) {
                     auto name = element.first;
                     auto blob_converter = element.second;
-                    blob_converter->ConvertFromMatAsync(*input_mat_map[name], input_params_map[name], command_queue);
+                    ret = blob_converter->ConvertFromMatAsync(*input_mat_map[name], input_params_map[name], command_queue);
+                    if (!CheckResult("ConvertFromMat", ret)) {
+                        return 0;
+                    }
                 }
                 ret = instance->ForwardAsync(nullptr);
+                if (!CheckResult("Forward", ret)) {
+                    return 0;
+                }
                 for(auto element : output_converters_map) {
                     auto name = element.first;
                     auto blob_converter = element.second;
-                    blob_converter->ConvertToMat(*output_mat_map[name], output_params_map[name], command_queue);
+                    ret = blob_converter->ConvertToMat(*output_mat_map[name], output_params_map[name], command_queue);
+                    if (!CheckResult("ConvertToMat", ret)) {
+                        return 0;
+                    }
                 }
                 timer.Stop();
             }
@@ -270,7 +279,7 @@ namespace test {
             config.params.push_back(buffer);
 
             if (config.model_type == MODEL_TYPE_TNN || config.model_type == MODEL_TYPE_NCNN) {
-                std::ifstream model_stream(model_path);
+                std::ifstream model_stream(model_path, std::ios::binary);
                 if (!model_stream.is_open() || !model_stream.good()) {
                     config.params.push_back("");
                     return config;
@@ -293,9 +302,9 @@ namespace test {
 
     NetworkConfig GetNetworkConfig() {
         NetworkConfig config;
-        // Precision : HIGH for float computing.
+        // Precision : AUTO for float computing.
         config.precision = ConvertPrecision(FLAGS_pr);
-        
+
         // Device Type: ARM, OPENECL, ...
         config.device_type = ConvertDeviceType(FLAGS_dt);
         
@@ -305,6 +314,9 @@ namespace test {
         if (FLAGS_lp.length() > 0) {
             config.library_path = {FLAGS_lp};
         }
+        //add for cache; When using Huawei NPU, 
+	//it is the path to store the om i.e. config.cache_path = "/data/local/tmp/npu_test/";
+        config.cache_path = "";
         return config;
     }
 
@@ -429,7 +441,7 @@ namespace test {
                 DimsVector dims   = mat->GetDims();
                 std::string shape = "( ";
                 for (auto dim : dims) {
-                    shape += to_string(dim) + " ";
+                    shape += ToString(dim) + " ";
                 }
                 shape += ")";
                 LOGD("the output shape: %s\n", shape.c_str());

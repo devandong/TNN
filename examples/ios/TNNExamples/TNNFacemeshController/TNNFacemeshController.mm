@@ -20,11 +20,9 @@
 #import <tuple>
 #import <tnn/tnn.h>
 
-#import "BlazeFaceDetector.h"
-#import "Facemesh.h"
+#import "blazeface_detector.h"
+#import "face_mesh.h"
 #import "UIImage+Utility.h"
-
-#define PROFILE 0
 
 using namespace std;
 using namespace TNN_NS;
@@ -96,7 +94,7 @@ using namespace TNN_NS;
     std::shared_ptr<BlazeFaceDetector> predictor = nullptr;
     
     // check release mode at Product->Scheme when running
-    //运行时请在Product->Scheme中确认意见调整到release模式
+    //运行时请在Product->Scheme中确认已经调整到release模式
     
     // Get metallib path from app bundle
     // PS：A script(Build Phases -> Run Script) is added to copy the metallib
@@ -107,9 +105,11 @@ using namespace TNN_NS;
                                                           ofType:nil];
     auto proto_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface.tnnproto"
                                                           ofType:nil];
-    if (proto_path.length <= 0 || model_path.length <= 0) {
-        self.labelResult.text = @"proto or model path is invalid";
-        NSLog(@"Error: proto or model path is invalid");
+    auto anchor_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface_anchors.txt"
+                                                          ofType:nil];
+    if (proto_path.length <= 0 || model_path.length <= 0 || anchor_path.length <= 0) {
+        self.labelResult.text = @"proto or model or anchor path is invalid";
+        NSLog(@"Error: proto or model or anchor path is invalid");
         return predictor;
     }
 
@@ -142,7 +142,7 @@ using namespace TNN_NS;
         //min_suppression_thresh
         option->min_suppression_threshold = 0.3;
         //predefined anchor file path
-        option->anchor_path = string([[[NSBundle mainBundle] pathForResource:@"blazeface_anchors.txt" ofType:nil] UTF8String]);
+        option->anchor_path = string(anchor_path.UTF8String);
     }
         
     predictor = std::make_shared<BlazeFaceDetector>();
@@ -160,7 +160,7 @@ using namespace TNN_NS;
     std::shared_ptr<Facemesh> predictor = nullptr;
     
     // check release mode at Product->Scheme when running
-    //运行时请在Product->Scheme中确认意见调整到release模式
+    //运行时请在Product->Scheme中确认已经调整到release模式
     
     // Get metallib path from app bundle
     // PS：A script(Build Phases -> Run Script) is added to copy the metallib
@@ -233,11 +233,14 @@ using namespace TNN_NS;
     BenchOption bench_option;
     bench_option.forward_count = 1;
 
+<<<<<<< HEAD
 #if PROFILE
     Timer timer;
     const std::string tag = (face_detector->GetComputeUnits()==TNNComputeUnitsCPU)?"CPU":"GPU";
 #endif
     
+=======
+>>>>>>> origin/feature_demo_blazepose
     UIImage* last_frame = nil;
     float sum_time = 0.f;
     for (NSString * img_path in self.result) {
@@ -274,6 +277,7 @@ using namespace TNN_NS;
                 }
                 // preprocess
                 auto input_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), N8UC4, facedetector_input_dims);
+<<<<<<< HEAD
 #if PROFILE
                 timer.start();
                 face_detector->Resize(image_mat, input_mat, TNNInterpLinear);
@@ -284,6 +288,10 @@ using namespace TNN_NS;
 #else
                 face_detector->Resize(image_mat, input_mat, TNNInterpLinear);
 #endif
+=======
+                face_detector->Resize(image_mat, input_mat, TNNInterpLinear);
+
+>>>>>>> origin/feature_demo_blazepose
                 status = face_detector->Predict(std::make_shared<BlazeFaceDetectorInput>(input_mat), sdk_output);
 
                 if (status != TNN_OK) {
@@ -320,6 +328,7 @@ using namespace TNN_NS;
 
                     DimsVector crop_dims = {1, 3, static_cast<int>(crop_rect.size.height), static_cast<int>(crop_rect.size.width)};
                     std::shared_ptr<TNN_NS::Mat> croped_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, crop_dims);
+<<<<<<< HEAD
 #if PROFILE
                     timer.start();
                     status = face_detector->Crop(image_mat, croped_mat, crop_rect.origin.x, crop_rect.origin.y);
@@ -329,11 +338,15 @@ using namespace TNN_NS;
 #else
                     status = face_detector->Crop(image_mat, croped_mat, crop_rect.origin.x, crop_rect.origin.y);
 #endif
+=======
+                    status = face_detector->Crop(image_mat, croped_mat, crop_rect.origin.x, crop_rect.origin.y);
+>>>>>>> origin/feature_demo_blazepose
                     if (status != TNN_OK) {
                         self.labelResult.text = [NSString stringWithUTF8String:status.description().c_str()];
                         NSLog(@"Error: %s", status.description().c_str());
                         return;
                     }
+<<<<<<< HEAD
                     std::shared_ptr<TNN_NS::Mat> input_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, target_face_mesh_dims);
 #if PROFILE
                     timer.start();
@@ -344,6 +357,11 @@ using namespace TNN_NS;
 #else
                     status = face_detector->Resize(croped_mat, input_mat, TNNInterpLinear);
 #endif
+=======
+
+                    std::shared_ptr<TNN_NS::Mat> input_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, target_face_mesh_dims);
+                    status = face_detector->Resize(croped_mat, input_mat, TNNInterpLinear);
+>>>>>>> origin/feature_demo_blazepose
                     if (status != TNN_OK) {
                         self.labelResult.text = [NSString stringWithUTF8String:status.description().c_str()];
                         NSLog(@"Error: %s", status.description().c_str());
@@ -352,7 +370,10 @@ using namespace TNN_NS;
 
                     std::shared_ptr<TNNSDKOutput> sdk_output = nullptr;
                     status = face_mesh->Predict(std::make_shared<FacemeshInput>(input_mat), sdk_output);
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/feature_demo_blazepose
                     if (status != TNN_OK) {
                         self.labelResult.text = [NSString stringWithUTF8String:status.description().c_str()];
                         NSLog(@"Error: %s", status.description().c_str());
@@ -384,7 +405,12 @@ using namespace TNN_NS;
 #if TARGET_IPHONE_SIMULATOR
                     // save image on simulator
                     NSString *out_name = [[img_path lastPathComponent] stringByReplacingOccurrencesOfString: @".jpg" withString:@"_out.jpg"];
+<<<<<<< HEAD
                     const std::string save_dir = "/Users/devandong/Desktop/tnn_output/";
+=======
+                    // set to destination directory
+                    const std::string save_dir = "/tmp";
+>>>>>>> origin/feature_demo_blazepose
                     std::string save_path = save_dir+string([out_name UTF8String]);
                     NSString *path = [NSString stringWithCString:save_path.c_str()
                                                         encoding:[NSString defaultCStringEncoding]];
@@ -415,10 +441,14 @@ using namespace TNN_NS;
     DimsVector target_face_mesh_dims = predictor_face_mesh->GetInputShape();
 
     auto units = self.switchGPU.isOn ? TNNComputeUnitsGPU : TNNComputeUnitsCPU;
+<<<<<<< HEAD
 #if PROFILE
     Timer timer;
     const std::string tag = (units == TNNComputeUnitsCPU)? "CPU": "GPU";
 #endif
+=======
+
+>>>>>>> origin/feature_demo_blazepose
     const int image_orig_height = (int)CGImageGetHeight(self.image_orig.CGImage);
     const int image_orig_width  = (int)CGImageGetWidth(self.image_orig.CGImage);
     DimsVector image_dims = {1, 3, image_orig_height, image_orig_width};
@@ -447,6 +477,7 @@ using namespace TNN_NS;
     std::vector<BlazeFaceInfo> face_info;
     {
         auto input_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, target_face_detector_dims);
+<<<<<<< HEAD
 #if PROFILE
         timer.start();
         status = predictor_face_detector->Resize(image_mat, input_mat, TNNInterpLinear);
@@ -456,6 +487,9 @@ using namespace TNN_NS;
 #else
         status = predictor_face_detector->Resize(image_mat, input_mat, TNNInterpLinear);
 #endif
+=======
+        status = predictor_face_detector->Resize(image_mat, input_mat, TNNInterpLinear);
+>>>>>>> origin/feature_demo_blazepose
         if (status != TNN_OK) {
             self.labelResult.text = [NSString stringWithUTF8String:status.description().c_str()];
             NSLog(@"Error: %s", status.description().c_str());
@@ -495,6 +529,7 @@ using namespace TNN_NS;
 
             DimsVector crop_dims = {1, 3, static_cast<int>(crop_rect.size.height), static_cast<int>(crop_rect.size.width)};
             std::shared_ptr<TNN_NS::Mat> croped_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, crop_dims);
+<<<<<<< HEAD
 #if PROFILE
             timer.start();
             status = predictor_face_detector->Crop(image_mat, croped_mat, crop_rect.origin.x, crop_rect.origin.y);
@@ -504,11 +539,15 @@ using namespace TNN_NS;
 #else
             status = predictor_face_detector->Crop(image_mat, croped_mat, crop_rect.origin.x, crop_rect.origin.y);
 #endif
+=======
+            status = predictor_face_detector->Crop(image_mat, croped_mat, crop_rect.origin.x, crop_rect.origin.y);
+>>>>>>> origin/feature_demo_blazepose
             if (status != TNN_OK) {
                 self.labelResult.text = [NSString stringWithUTF8String:status.description().c_str()];
                 NSLog(@"Error: %s", status.description().c_str());
                 return;
             }
+<<<<<<< HEAD
             std::shared_ptr<TNN_NS::Mat> input_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, target_face_mesh_dims);
 #if PROFILE
             timer.start();
@@ -519,6 +558,11 @@ using namespace TNN_NS;
 #else
             status = predictor_face_detector->Resize(croped_mat, input_mat, TNNInterpLinear);
 #endif
+=======
+
+            std::shared_ptr<TNN_NS::Mat> input_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, target_face_mesh_dims);
+            status = predictor_face_detector->Resize(croped_mat, input_mat, TNNInterpLinear);
+>>>>>>> origin/feature_demo_blazepose
             if (status != TNN_OK) {
                 self.labelResult.text = [NSString stringWithUTF8String:status.description().c_str()];
                 NSLog(@"Error: %s", status.description().c_str());

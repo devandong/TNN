@@ -15,6 +15,7 @@ public class ObjectDetector {
                 "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
                 "hair drier", "toothbrush"};
 
+<<<<<<< HEAD
     public static class ObjectInfo {
         public float x1;
         public float y1;
@@ -28,6 +29,12 @@ public class ObjectDetector {
     public native boolean checkNpu(String modelPath);
     public native int deinit();
     public native ObjectInfo[] detectFromStream(byte[] yuv420sp, int width, int height, int rotate);
+=======
+    public native int init(String modelPath, int width, int height, float scoreThreshold, float iouThreshold, int topk, int computeType);
+    public native boolean checkNpu(String modelPath);
+    public native int deinit();
+    public native ObjectInfo[] detectFromStream(byte[] yuv420sp, int width, int height, int view_width, int view_height, int rotate);
+>>>>>>> origin/feature_demo_blazepose
     public native ObjectInfo[] detectFromImage(Bitmap bitmap, int width, int height);
 
 }

@@ -29,7 +29,13 @@
 -(void)removeFromSuperLayer;
 
 - (void)showText:(NSString *)text withColor:(UIColor *)color atFrame:(CGRect)frame;
+<<<<<<< HEAD
 - (void)showMarkAtPoints:(std::vector<std::pair<float, float>>)points withColor:(UIColor *)color;
+=======
+- (void)showMarkAtPoints:(std::vector<std::pair<float, float>>)points withColor:(UIColor *)color circle:(BOOL)circle;
+- (void)showLines:(std::vector<std::pair<float, float>>)points lines:(std::vector<std::pair<int, int>>)lines
+        withColor:(UIColor *)color;
+>>>>>>> origin/feature_demo_blazepose
 - (void)hide;
 @end
 

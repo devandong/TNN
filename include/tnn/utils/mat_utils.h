@@ -31,6 +31,17 @@ typedef enum {
     BORDER_TYPE_EDGE     = 0x02,
 } PUBLIC BorderType;
 
+typedef enum {
+    COLOR_CONVERT_NV12TOBGR  = 0x00,
+    COLOR_CONVERT_NV12TOBGRA = 0x01,
+    COLOR_CONVERT_NV21TOBGR  = 0x02,
+    COLOR_CONVERT_NV21TOBGRA = 0x03,
+    COLOR_CONVERT_BGRTOGRAY  = 0x04,
+    COLOR_CONVERT_BGRATOGRAY = 0x05,
+    COLOR_CONVERT_RGBTOGRAY  = 0x06,
+    COLOR_CONVERT_RGBATOGRAY = 0x07,
+} PUBLIC ColorConversionType;
+
 struct PUBLIC ResizeParam {
     float scale_w = 0.0f;
     float scale_h = 0.0f;
@@ -47,6 +58,15 @@ struct PUBLIC CropParam {
 struct PUBLIC WarpAffineParam {
     float transform[2][3];
     InterpType interp_type = INTERP_TYPE_NEAREST;
+    BorderType border_type = BORDER_TYPE_CONSTANT;
+    float border_val       = 0.0f;
+};
+
+struct PUBLIC CopyMakeBorderParam {
+    int top    = 0;
+    int bottom = 0;
+    int left   = 0;
+    int right  = 0;
     BorderType border_type = BORDER_TYPE_CONSTANT;
     float border_val       = 0.0f;
 };
@@ -68,7 +88,10 @@ public:
     static Status WarpAffine(Mat& src, Mat& dst, WarpAffineParam param, void* command_queue);
 
     //src and dst device type must be same.
-    static Status BGR2Gray(Mat& src, Mat& dst, void* command_queue);
+    static Status CvtColor(Mat& src, Mat& dst, ColorConversionType type, void* command_queue);
+
+    //src and dst device type must be same. param top, bottom, left and right must be non-negative.
+    static Status CopyMakeBorder(Mat& src, Mat& dst, CopyMakeBorderParam param, void* command_queue);
 };
 
 }  // namespace TNN_NS

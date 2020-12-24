@@ -34,7 +34,7 @@ cd <path_to_tnn>/platforms/linux/
 |-n, --mean         |        |&radic;|
 Pre-processing, mean operation on each channel of input data, parameter format: 0.0, 0.0, 0.0|
 |-s, --scale        |        |&radic;|Pre-processing, scale the input data channels, the parameter format is: 1.0, 1.0, 1.0|
-|-c, --merge_channel|        |&radic;|Whether to calculate all the channels together when quantifying the feature map, otherwise it is calculated separately for each channel.|  
+|-t, --merge_type|        |&radic;|Whether use per-tensor or per-channel method when quantifying: <br>&bull; 0 per-channel method (default)<br>&bull; 1 mix method, weights: per-channel, blob: per-tensor.<br>&bull; 2 per-tensor method|  
   
 ### 3. Quantization Input   
 #### 3.1 Select input data    
@@ -51,7 +51,7 @@ Two files will be generated in the current directory where the command is execut
 ### 5. Note  
 （1）-n and -s parameter only works when the input is a picture；  
 （2）When the input is a picture，it will be converted to RGB format for processing internally;
-(3) When the input is txt, the input data storage method is NCHW, and of type float. The storage format stores one data in one line, in total of N*C*H*W lines. E.g,
+ (3) When the input is txt, the input data storage method is NCHW, and of type float. The storage format stores one data in one line, in total of N*C*H*W lines. E.g,
 ```
 0.01
 1.1
@@ -59,3 +59,4 @@ Two files will be generated in the current directory where the command is execut
 255.0
 ...
 ```
+ (4) scale and mean need to be the value after calculation. For example, 1.0/128.0 is invalid and 0.0078125 is ok.  

@@ -18,7 +18,7 @@
 #include <iostream>
 #import <tnn/tnn.h>
 
-#import "ImageClassifier.h"
+#import "image_classifier.h"
 #import "UIImage+Utility.h"
 
 using namespace std;
@@ -86,7 +86,7 @@ using namespace TNN_NS;
 
 - (IBAction)onBtnTNNExamples:(id)sender {
     // check release mode at Product->Scheme when running
-    //运行时请在Product->Scheme中确认意见调整到release模式
+    //运行时请在Product->Scheme中确认已经调整到release模式
 
     // Get metallib path from app bundle
     // PS：A script(Build Phases -> Run Script) is added to copy the metallib
@@ -161,17 +161,12 @@ using namespace TNN_NS;
     
     auto target_dims = predictor->GetInputShape();
     auto input_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, target_dims);
-#if PROFILE
-    const std::string tag = (units == TNNComputeUnitsCPU)?"CPU":"GPU";
-    Timer timer;
-    timer.start();
     status = predictor->Resize(image_mat, input_mat, TNNInterpLinear);
-    timer.printElapsed(tag, "Resize");
-    printShape("Resize src", image_mat->GetDims());
-    printShape("Resize dst", input_mat->GetDims());
-#else
-    status = predictor->Resize(image_mat, input_mat, TNNInterpLinear);
-#endif
+    if (status != TNN_OK) {
+        NSLog(@"Error: %s", status.description().c_str());
+        return;
+    }
+
     std::shared_ptr<TNNSDKOutput> sdk_output = nullptr;
     status = predictor->Predict(std::make_shared<TNNSDKInput>(input_mat), sdk_output);
    
@@ -179,7 +174,7 @@ using namespace TNN_NS;
         NSLog(@"Error: %s", status.description().c_str());
         return;
     }
-    
+
     int class_id = -1;
     if (sdk_output && dynamic_cast<ImageClassifierOutput *>(sdk_output.get())) {
         auto classfy_output = dynamic_cast<ImageClassifierOutput *>(sdk_output.get());

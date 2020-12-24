@@ -28,7 +28,7 @@ public:
 
 private:
     std::shared_ptr<cl::Buffer> inter_buffer_ = nullptr;
-    std::vector<int> dims_ = {};
+    std::vector<int> dims_                    = {};
 };
 
 Status OpenCLPermuteLayerAcc::Init(Context *context, LayerParam *param, LayerResource *resource,
@@ -89,13 +89,13 @@ Status OpenCLPermuteLayerAcc::Reshape(const std::vector<Blob *> &inputs, const s
 
     int size0          = UP_DIV(output_dims[1], 4) * 4 * output_dims[0] * output_dims[2] * output_dims[3];
     int size1          = UP_DIV(input_dims[1], 4) * 4 * input_dims[0] * input_dims[2] * input_dims[3];
-    int blob_elem_size = opencl_runtime->GetFp16Enable() ? 2 : 4;
+    int blob_elem_size = opencl_runtime->GetPrecision() != PRECISION_HIGH ? 2 : 4;
     int blob_size      = std::max(size0, size1) * blob_elem_size;
 
     inter_buffer_        = std::make_shared<cl::Buffer>(*opencl_runtime->Context(), CL_MEM_READ_WRITE, blob_size);
     int offset[4]        = {0, 0, 0, 0};
-    int output_stride[4] = {output_dims[2] * output_dims[3] * output_dims[1], 1, output_dims[3] * output_dims[1],
-                            output_dims[1]};
+    int output_stride[4] = {output_dims[1] * output_dims[2] * output_dims[3], output_dims[2] * output_dims[3],
+                            output_dims[3], 1};
     int permute_input_stride[4];
     for (int i = 0; i < dims_.size(); ++i) {
         permute_input_stride[i] = output_stride[dims_[i]];

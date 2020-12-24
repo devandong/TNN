@@ -14,7 +14,7 @@
 
 #include "tnn/device/opencl/acc/opencl_layer_acc.h"
 #include "tnn/device/opencl/imagebuffer_convertor.h"
-#include "tnn/utils/string_utils.h"
+#include "tnn/utils/string_utils_inner.h"
 
 namespace TNN_NS {
 
@@ -33,7 +33,8 @@ Status OpenCLLayerAcc::Init(Context *context, LayerParam *param, LayerResource *
     }
     execute_units_.resize(1);
 
-    if (OpenCLRuntime::GetInstance()->GetFp16Enable()) {
+    if (context->GetPrecision() != PRECISION_HIGH) {
+        LOGD("OpenCL Blob Pricision is Half!\n");
         for (auto blob : inputs) {
             blob->GetBlobDesc().data_type = DATA_TYPE_HALF;
         }
@@ -41,6 +42,7 @@ Status OpenCLLayerAcc::Init(Context *context, LayerParam *param, LayerResource *
             blob->GetBlobDesc().data_type = DATA_TYPE_HALF;
         }
     } else {
+        LOGD("OpenCL Blob Pricision is Float!\n");
         for (auto blob : inputs) {
             blob->GetBlobDesc().data_type = DATA_TYPE_FLOAT;
         }
@@ -131,7 +133,7 @@ void OpenCLLayerAcc::UpdateProfilingData(OpenCLProfilingData *pdata, std::vector
                                          std::vector<uint32_t> lws, int idx) {
     AbstractLayerAcc::UpdateProfilingData(pdata, param_, input_dims_, output_dims_);
     if (idx != 0)
-        pdata->layer_name += "_" + to_string(idx);
+        pdata->layer_name += "_" + ToString(idx);
     pdata->op_name         = op_name_;
     pdata->global_worksize = gws;
     pdata->local_worksize  = lws;
@@ -231,7 +233,7 @@ Status OpenCLLayerAcc::ConvertChannelWeights(float *handle_data_ptr, shared_ptr<
         // use clBuffer
         ocl_handle.reset(new OpenCLMemory(TNN_CL_BUFFER));
         size_t type_size = sizeof(float);
-        if (opencl_runtime->GetFp16Enable())
+        if (opencl_runtime->GetPrecision() != PRECISION_HIGH)
             type_size = 2;
         cl::Buffer *buffer =
             new cl::Buffer(*opencl_runtime->Context(), CL_MEM_READ_WRITE, handle_size * type_size, nullptr, &ret);
@@ -254,7 +256,7 @@ Status OpenCLLayerAcc::ConvertChannelWeights(float *handle_data_ptr, shared_ptr<
         int ocl_handle_w          = UP_DIV(output_channel, 4);
         int ocl_handle_h          = 1;
         cl_channel_type data_type = CL_FLOAT;
-        if (opencl_runtime->GetFp16Enable())
+        if (opencl_runtime->GetPrecision() != PRECISION_HIGH)
             data_type = CL_HALF_FLOAT;
         cl::Image2D *image =
             new cl::Image2D(*opencl_runtime->Context(), CL_MEM_READ_WRITE, cl::ImageFormat(CL_RGBA, data_type),

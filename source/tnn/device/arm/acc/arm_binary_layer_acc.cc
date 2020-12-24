@@ -21,19 +21,8 @@
 
 namespace TNN_NS {
 
-/*
-Binary func with different opreator,
-set dims0 full shape, dims1 broadcast shape, so we need to swap input ptrs
-*/
-Status ArmBinaryLayerAcc::BinaryFunc(float *output_ptr, float *input0_ptr, float *input1_ptr, DimsVector &dims0,
-                                     DimsVector &dims1) {
-    DimsVector dims = DimsVectorUtils::Max(dims0, dims1);
-    DimsVector dims_broadcast;
-    BroadcastType type = BroadcastTypeUnknown;
-    auto _input0       = input0_ptr;
-    auto _input1       = input1_ptr;
-    bool swap_flag     = false;
-
+static void BroadCastInit(const DimsVector &dims, const DimsVector &dims0, const DimsVector &dims1, BroadcastType &type,
+                          DimsVector &dims_broadcast, bool &swap_flag) {
     if (DimsVectorUtils::Equal(dims0, dims1)) {
         type = BroadcastTypeNormal;
         dims_broadcast.clear();
@@ -58,6 +47,23 @@ Status ArmBinaryLayerAcc::BinaryFunc(float *output_ptr, float *input0_ptr, float
         dims_broadcast = dims0;
         swap_flag      = true;
     }
+}
+
+/*
+Binary func with different opreator,
+set dims0 full shape, dims1 broadcast shape, so we need to swap input ptrs
+*/
+template <typename Tout, typename Tin1, typename Tin2>
+Status ArmBinaryLayerAcc::BinaryFunc(Tout *output_ptr, Tin1 *input0_ptr, Tin2 *input1_ptr, DimsVector &dims0,
+                                     DimsVector &dims1) {
+    DimsVector dims = DimsVectorUtils::Max(dims0, dims1);
+    DimsVector dims_broadcast;
+    BroadcastType type = BroadcastTypeUnknown;
+    auto _input0       = input0_ptr;
+    auto _input1       = input1_ptr;
+    bool swap_flag     = false;
+
+    BroadCastInit(dims, dims0, dims1, type, dims_broadcast, swap_flag);
 
     if (swap_flag) {
         std::swap(_input0, _input1);
@@ -70,56 +76,106 @@ Status ArmBinaryLayerAcc::BinaryFunc(float *output_ptr, float *input0_ptr, float
     int count      = dims[0] * ROUND_UP(dims[1], 4) * dims[2] * dims[3];
     int count_quad = UP_DIV(count, 4);
 
-    if (type == BroadcastTypeSingle) {
-        // broadcast single
-        for (int n = 0; n < count_quad; n++) {
-            auto v1 = Float4::load(_input0 + n * 4);
-            auto v2 = Float4(_input1[0]);
-            Float4::save(output_ptr + n * 4, _Operator(v1, v2, swap_flag));
-        }
-    } else if (type == BroadcastTypeNormal) {
-        // no broadcast
+    if (type == BroadcastTypeNormal) {
         for (int n = 0; n < count_quad; n++) {
             auto v1 = Float4::load(_input0 + n * 4);
             auto v2 = Float4::load(_input1 + n * 4);
-            Float4::save(output_ptr + n * 4, _Operator(v1, v2, swap_flag));
+            Float4::save(output_ptr + n * 4, _Operator(v1, v2));
         }
-    } else if (type == BroadcastTypeChannel) {
-        // broadcast channel
-        for (int n = 0; n < count_quad; n++) {
-            int b               = n / (dims[2] * dims[3] * UP_DIV(dims[1], 4));
-            int channel_4_index = n / (dims[2] * dims[3]) - b * UP_DIV(dims[1], 4);
-            auto v1             = Float4::load(_input0 + n * 4);
-            auto v2             = Float4::load(_input1 + channel_4_index * 4);
-            Float4::save(output_ptr + n * 4, _Operator(v1, v2, swap_flag));
-        }
-    } else if (type == BroadcastTypeElement) {
-        // broadcast chw
-        for (int n = 0; n < count_quad; n++) {
-            int channel_4_index = n % (dims[2] * dims[3] * UP_DIV(dims[1], 4));
-            auto v1             = Float4::load(_input0 + n * 4);
-            auto v2             = Float4::load(_input1 + channel_4_index * 4);
-            Float4::save(output_ptr + n * 4, _Operator(v1, v2, swap_flag));
-        }
-    } else if (type == BroadcastTypeHeightWidth) {
-        // broadcast hw
-        for (int n = 0; n < count_quad; n++) {
-            int hw_index = n % (dims[2] * dims[3]);
-            auto v1      = Float4::load(_input0 + n * 4);
-            auto v2      = Float4(_input1[hw_index * 4]);
-            Float4::save(output_ptr + n * 4, _Operator(v1, v2, swap_flag));
-        }
-    } else if (type == BroadcastTypeWidth) {
-        // broadcast w
-        for (int n = 0; n < count_quad; n++) {
-            int hw_index = n % (dims[3]);
-            auto v1      = Float4::load(_input0 + n * 4);
-            auto v2      = Float4(_input1[hw_index * 4]);
-            Float4::save(output_ptr + n * 4, _Operator(v1, v2, swap_flag));
+
+        return TNN_OK;
+    }
+
+    if (swap_flag) {
+        if (type == BroadcastTypeSingle) {
+            // broadcast single
+            for (int n = 0; n < count_quad; n++) {
+                auto v1 = Float4::load(_input0 + n * 4);
+                auto v2 = Float4(_input1[0]);
+                Float4::save(output_ptr + n * 4, _Operator(v2, v1));
+            }
+        } else if (type == BroadcastTypeChannel) {
+            // broadcast channel
+            for (int n = 0; n < count_quad; n++) {
+                int b               = n / (dims[2] * dims[3] * UP_DIV(dims[1], 4));
+                int channel_4_index = n / (dims[2] * dims[3]) - b * UP_DIV(dims[1], 4);
+                auto v1             = Float4::load(_input0 + n * 4);
+                auto v2             = Float4::load(_input1 + channel_4_index * 4);
+                Float4::save(output_ptr + n * 4, _Operator(v2, v1));
+            }
+        } else if (type == BroadcastTypeElement) {
+            // broadcast chw
+            for (int n = 0; n < count_quad; n++) {
+                int channel_4_index = n % (dims[2] * dims[3] * UP_DIV(dims[1], 4));
+                auto v1             = Float4::load(_input0 + n * 4);
+                auto v2             = Float4::load(_input1 + channel_4_index * 4);
+                Float4::save(output_ptr + n * 4, _Operator(v2, v1));
+            }
+        } else if (type == BroadcastTypeHeightWidth) {
+            // broadcast hw
+            for (int n = 0; n < count_quad; n++) {
+                int hw_index = n % (dims[2] * dims[3]);
+                auto v1      = Float4::load(_input0 + n * 4);
+                auto v2      = Float4(_input1[hw_index * 4]);
+                Float4::save(output_ptr + n * 4, _Operator(v2, v1));
+            }
+        } else if (type == BroadcastTypeWidth) {
+            // broadcast w
+            for (int n = 0; n < count_quad; n++) {
+                int hw_index = n % (dims[3]);
+                auto v1      = Float4::load(_input0 + n * 4);
+                auto v2      = Float4(_input1[hw_index * 4]);
+                Float4::save(output_ptr + n * 4, _Operator(v2, v1));
+            }
+        } else {
+            LOGE("Error: invalid add type\n");
+            return Status(TNNERR_LAYER_ERR, "Error: Binary layer's unsupported broadcast type");
         }
     } else {
-        LOGE("Error: invalid add type\n");
-        return Status(TNNERR_LAYER_ERR, "Error: Binary layer's unsupported broadcast type");
+        if (type == BroadcastTypeSingle) {
+            // broadcast single
+            for (int n = 0; n < count_quad; n++) {
+                auto v1 = Float4::load(_input0 + n * 4);
+                auto v2 = Float4(_input1[0]);
+                Float4::save(output_ptr + n * 4, _Operator(v1, v2));
+            }
+        } else if (type == BroadcastTypeChannel) {
+            // broadcast channel
+            for (int n = 0; n < count_quad; n++) {
+                int b               = n / (dims[2] * dims[3] * UP_DIV(dims[1], 4));
+                int channel_4_index = n / (dims[2] * dims[3]) - b * UP_DIV(dims[1], 4);
+                auto v1             = Float4::load(_input0 + n * 4);
+                auto v2             = Float4::load(_input1 + channel_4_index * 4);
+                Float4::save(output_ptr + n * 4, _Operator(v1, v2));
+            }
+        } else if (type == BroadcastTypeElement) {
+            // broadcast chw
+            for (int n = 0; n < count_quad; n++) {
+                int channel_4_index = n % (dims[2] * dims[3] * UP_DIV(dims[1], 4));
+                auto v1             = Float4::load(_input0 + n * 4);
+                auto v2             = Float4::load(_input1 + channel_4_index * 4);
+                Float4::save(output_ptr + n * 4, _Operator(v1, v2));
+            }
+        } else if (type == BroadcastTypeHeightWidth) {
+            // broadcast hw
+            for (int n = 0; n < count_quad; n++) {
+                int hw_index = n % (dims[2] * dims[3]);
+                auto v1      = Float4::load(_input0 + n * 4);
+                auto v2      = Float4(_input1[hw_index * 4]);
+                Float4::save(output_ptr + n * 4, _Operator(v1, v2));
+            }
+        } else if (type == BroadcastTypeWidth) {
+            // broadcast w
+            for (int n = 0; n < count_quad; n++) {
+                int hw_index = n % (dims[3]);
+                auto v1      = Float4::load(_input0 + n * 4);
+                auto v2      = Float4(_input1[hw_index * 4]);
+                Float4::save(output_ptr + n * 4, _Operator(v1, v2));
+            }
+        } else {
+            LOGE("Error: invalid add type\n");
+            return Status(TNNERR_LAYER_ERR, "Error: Binary layer's unsupported broadcast type");
+        }
     }
 
     return TNN_OK;
@@ -171,6 +227,18 @@ Status ArmBinaryLayerAcc::allocateBufferParam(const std::vector<Blob *> &inputs,
                     static_cast<float *>(layer_data), temp.force_to<float *>(), dims[0], dims[1], dims[2], dims[3]);
                 broadcast_ = temp;
             }
+
+            if (outputs[0]->GetBlobDesc().data_type == DATA_TYPE_BFP16) {
+                RawBuffer bfp16_temp(broadcast_.GetBytesSize() / 2);
+                bfp16_temp.SetDataType(DATA_TYPE_BFP16);
+                auto src = broadcast_.force_to<float *>();
+                auto dst = bfp16_temp.force_to<bfp16_t *>();
+                if (broadcast_.GetDataCount() == 1) {
+                    dst[0] = src[0];
+                } else {
+                    FloatConvert(src, dst, broadcast_.GetDataCount() / 4);
+                }
+            }
         } else {
             // Todo
         }
@@ -179,7 +247,8 @@ Status ArmBinaryLayerAcc::allocateBufferParam(const std::vector<Blob *> &inputs,
     return TNN_OK;
 }
 
-Status ArmBinaryLayerAcc::DoForward(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs) {
+template <typename T>
+Status ArmBinaryLayerAcc::Exec(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs) {
     auto layer_param = dynamic_cast<MultidirBroadcastLayerParam *>(param_);
     CHECK_PARAM_NULL(layer_param);
     auto layer_res = dynamic_cast<EltwiseLayerResource *>(resource_);
@@ -226,22 +295,29 @@ Status ArmBinaryLayerAcc::DoForward(const std::vector<Blob *> &inputs, const std
         }
     }
 
-    if (output->GetBlobDesc().data_type == DATA_TYPE_FLOAT) {
-        auto output_ptr = reinterpret_cast<float *>(GetBlobHandlePtr(output->GetHandle()));
-        auto input0_ptr = reinterpret_cast<float *>(input_ptrs[0]);
-        auto input1_ptr = reinterpret_cast<float *>(input_ptrs[1]);
+    auto output_ptr = reinterpret_cast<T *>(GetBlobHandlePtr(output->GetHandle()));
+    auto input0_ptr = reinterpret_cast<T *>(input_ptrs[0]);
+    auto input1_ptr = reinterpret_cast<T *>(input_ptrs[1]);
 
-        BinaryFunc(output_ptr, input0_ptr, input1_ptr, input_shapes[0], input_shapes[1]);
+    BinaryFunc(output_ptr, input0_ptr, input1_ptr, input_shapes[0], input_shapes[1]);
 
-        for (int i = 2; i < input_ptrs.size(); i++) {
-            auto input_ptr = reinterpret_cast<float *>(input_ptrs[i]);
-            BinaryFunc(output_ptr, output_ptr, input_ptr, dims, input_shapes[i]);
-        }
-    } else {
-        LOGE("Error: layer acc dont support datatype: %d\n", output->GetBlobDesc().data_type);
+    for (int i = 2; i < input_ptrs.size(); i++) {
+        auto input_ptr = reinterpret_cast<T *>(input_ptrs[i]);
+        BinaryFunc(output_ptr, output_ptr, input_ptr, dims, input_shapes[i]);
     }
 
     return TNN_OK;
+}
+
+Status ArmBinaryLayerAcc::DoForward(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs) {
+    auto data_type = outputs[0]->GetBlobDesc().data_type;
+    if (data_type == DATA_TYPE_FLOAT) {
+        return Exec<float>(inputs, outputs);
+    } else if (data_type == DATA_TYPE_BFP16) {
+        return Exec<bfp16_t>(inputs, outputs);
+    } else {
+        return TNNERR_LAYER_ERR;
+    }
 }
 
 }  // namespace TNN_NS

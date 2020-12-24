@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.tencent.tnn.demo.FaceDetector;
 import com.tencent.tnn.demo.FileUtils;
 import com.tencent.tnn.demo.Helper;
 import com.tencent.tnn.demo.ImageClassify;
@@ -34,9 +33,15 @@ public class ImageClassifyDetectFragment extends BaseFragment {
     private Button mRunButton;
     private boolean mUseGPU = false;
     //add for npu
+<<<<<<< HEAD
     private ToggleButton mNPUswitch;
     private boolean mUseNPU = false;
     private TextView NpuTextView;
+=======
+    private ToggleButton mHuaweiNPUswitch;
+    private boolean mUseHuaweiNpu = false;
+    private TextView HuaweiNpuTextView;
+>>>>>>> origin/feature_demo_blazepose
 
     /**********************************     Get Preview Advised    **********************************/
 
@@ -78,9 +83,15 @@ public class ImageClassifyDetectFragment extends BaseFragment {
 
     private void onSwichGPU(boolean b)
     {
+<<<<<<< HEAD
         if (b && mNPUswitch.isChecked()) {
             mNPUswitch.setChecked(false);
             mUseNPU = false;
+=======
+        if (b && mHuaweiNPUswitch.isChecked()) {
+            mHuaweiNPUswitch.setChecked(false);
+            mUseHuaweiNpu = false;
+>>>>>>> origin/feature_demo_blazepose
         }
         mUseGPU = b;
         TextView result_view = (TextView)$(R.id.result);
@@ -93,7 +104,11 @@ public class ImageClassifyDetectFragment extends BaseFragment {
             mGPUSwitch.setChecked(false);
             mUseGPU = false;
         }
+<<<<<<< HEAD
         mUseNPU = b;
+=======
+        mUseHuaweiNpu = b;
+>>>>>>> origin/feature_demo_blazepose
         TextView result_view = (TextView)$(R.id.result);
         result_view.setText("");
     }
@@ -107,7 +122,7 @@ public class ImageClassifyDetectFragment extends BaseFragment {
     @Override
     public void setFragmentView() {
         Log.d(TAG, "setFragmentView");
-        setView(R.layout.fragment_imageclassifydetector);
+        setView(R.layout.fragment_image_detector);
         setTitleGone();
         $$(R.id.back_rl);
         $$(R.id.gpu_switch);
@@ -119,18 +134,30 @@ public class ImageClassifyDetectFragment extends BaseFragment {
             }
         });
         $$(R.id.npu_switch);
+<<<<<<< HEAD
         mNPUswitch = $(R.id.npu_switch);
         mNPUswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+=======
+        mHuaweiNPUswitch = $(R.id.npu_switch);
+        mHuaweiNPUswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+>>>>>>> origin/feature_demo_blazepose
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 onSwichNPU(b);
             }
         });
 
+<<<<<<< HEAD
         NpuTextView = $(R.id.npu_text);
         if (!NpuEnable) {
             NpuTextView.setVisibility(View.INVISIBLE);
             mNPUswitch.setVisibility(View.INVISIBLE);
+=======
+        HuaweiNpuTextView = $(R.id.npu_text);
+        if (!NpuEnable) {
+            HuaweiNpuTextView.setVisibility(View.INVISIBLE);
+            mHuaweiNPUswitch.setVisibility(View.INVISIBLE);
+>>>>>>> origin/feature_demo_blazepose
         }
 
         mRunButton = $(R.id.run_button);
@@ -173,7 +200,11 @@ public class ImageClassifyDetectFragment extends BaseFragment {
         String modelPath = initModel();
         Log.d(TAG, "Init classify " + modelPath);
         int device = 0;
+<<<<<<< HEAD
         if (mUseNPU) {
+=======
+        if (mUseHuaweiNpu) {
+>>>>>>> origin/feature_demo_blazepose
             device = 2;
         } else if (mUseGPU) {
             device = 1;

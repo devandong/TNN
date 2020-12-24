@@ -74,7 +74,7 @@ TNN network construction needs configure the NetworkConfig parameter，and devic
 Specific npu type needs to be specified for NPU。
 
 ```cpp
-config.network_type = TNN_NS::NETWORK_TYPE_NPU;
+config.network_type = TNN_NS::NETWORK_TYPE_HUAWEI_NPU;
 ```
 
 ### Step3. Input
@@ -165,7 +165,7 @@ struct PUBLIC NetworkConfig {
     std::vector<std::string> library_path = {}; 
 
     // compute precision
-    Precision precision = PRECISION_HIGH;
+    Precision precision = PRECISION_AUTO;
 };
 ```
 NetworkConfig parameter description:

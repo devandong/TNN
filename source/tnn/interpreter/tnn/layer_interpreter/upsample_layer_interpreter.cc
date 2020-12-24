@@ -67,7 +67,7 @@ DECLARE_LAYER_INTERPRETER(Upsample, LAYER_UPSAMPLE);
             return Status(TNNERR_NULL_PARAM, "invalid layer param to save");
         }
 
-        output_stream << layer_param->type << " ";
+        output_stream << layer_param->mode << " ";
 
         ASSERT(layer_param->scales.size() == 2);
         output_stream << layer_param->scales[1] << " ";

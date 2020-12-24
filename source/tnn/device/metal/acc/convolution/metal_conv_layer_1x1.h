@@ -32,10 +32,14 @@ public:
     Status AllocateBufferParam(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs);
     
 public:
-    virtual std::string KernelName();
+    virtual std::string KernelName(const std::vector<Blob *> &inputs, const std::vector<Blob *> &outputs);
     virtual Status ComputeThreadSize(const std::vector<Blob *> &inputs,
                                      const std::vector<Blob *> &outputs,
                                      MTLSize &size);
+    virtual Status SetKernelEncoderParam(
+                                         id<MTLComputeCommandEncoder> encoder,
+                                         const std::vector<Blob *> &inputs,
+                                         const std::vector<Blob *> &outputs);
 };
 
 }  // namespace TNN_NS

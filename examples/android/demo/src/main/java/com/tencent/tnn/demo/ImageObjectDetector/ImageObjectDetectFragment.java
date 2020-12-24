@@ -18,6 +18,10 @@ import android.widget.ToggleButton;
 import com.tencent.tnn.demo.ObjectDetector;
 import com.tencent.tnn.demo.FileUtils;
 import com.tencent.tnn.demo.Helper;
+<<<<<<< HEAD
+=======
+import com.tencent.tnn.demo.ObjectInfo;
+>>>>>>> origin/feature_demo_blazepose
 import com.tencent.tnn.demo.R;
 import com.tencent.tnn.demo.common.component.DrawView;
 import com.tencent.tnn.demo.common.fragment.BaseFragment;
@@ -39,9 +43,15 @@ public class ImageObjectDetectFragment extends BaseFragment {
     private Button mRunButton;
     private boolean mUseGPU = false;
     //add for npu
+<<<<<<< HEAD
     private ToggleButton mNPUswitch;
     private boolean mUseNPU = false;
     private TextView NpuTextView;
+=======
+    private ToggleButton mHuaweiNPUswitch;
+    private boolean mUseHuaweiNpu = false;
+    private TextView HuaweiNpuTextView;
+>>>>>>> origin/feature_demo_blazepose
 
     /**********************************     Get Preview Advised    **********************************/
 
@@ -83,9 +93,15 @@ public class ImageObjectDetectFragment extends BaseFragment {
 
     private void onSwichGPU(boolean b)
     {
+<<<<<<< HEAD
         if(b && mNPUswitch.isChecked()){
             mNPUswitch.setChecked(false);
             mUseNPU = false;
+=======
+        if(b && mHuaweiNPUswitch.isChecked()){
+            mHuaweiNPUswitch.setChecked(false);
+            mUseHuaweiNpu = false;
+>>>>>>> origin/feature_demo_blazepose
         }
         mUseGPU = b;
         TextView result_view = (TextView)$(R.id.result);
@@ -98,7 +114,11 @@ public class ImageObjectDetectFragment extends BaseFragment {
             mGPUSwitch.setChecked(false);
             mUseGPU = false;
         }
+<<<<<<< HEAD
         mUseNPU = b;
+=======
+        mUseHuaweiNpu = b;
+>>>>>>> origin/feature_demo_blazepose
         TextView result_view = (TextView)$(R.id.result);
         result_view.setText("");
     }
@@ -112,7 +132,11 @@ public class ImageObjectDetectFragment extends BaseFragment {
     @Override
     public void setFragmentView() {
         Log.d(TAG, "setFragmentView");
+<<<<<<< HEAD
         setView(R.layout.fragment_imageobjectdetector);
+=======
+        setView(R.layout.fragment_image_detector);
+>>>>>>> origin/feature_demo_blazepose
         setTitleGone();
         $$(R.id.back_rl);
         $$(R.id.gpu_switch);
@@ -125,19 +149,32 @@ public class ImageObjectDetectFragment extends BaseFragment {
         });
 
         $$(R.id.npu_switch);
+<<<<<<< HEAD
         mNPUswitch = $(R.id.npu_switch);
         mNPUswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+=======
+        mHuaweiNPUswitch = $(R.id.npu_switch);
+        mHuaweiNPUswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+>>>>>>> origin/feature_demo_blazepose
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 onSwichNPU(b);
             }
         });
 
+<<<<<<< HEAD
         NpuTextView = $(R.id.npu_text);
 
         if (!NpuEnable) {
             NpuTextView.setVisibility(View.INVISIBLE);
             mNPUswitch.setVisibility(View.INVISIBLE);
+=======
+        HuaweiNpuTextView = $(R.id.npu_text);
+
+        if (!NpuEnable) {
+            HuaweiNpuTextView.setVisibility(View.INVISIBLE);
+            mHuaweiNPUswitch.setVisibility(View.INVISIBLE);
+>>>>>>> origin/feature_demo_blazepose
         }
         mDrawView = (DrawView) $(R.id.drawView);
         mRunButton = $(R.id.run_button);
@@ -172,15 +209,22 @@ public class ImageObjectDetectFragment extends BaseFragment {
     private void startDetect() {
 
         Bitmap originBitmap = FileUtils.readBitmapFromFile(getActivity().getAssets(), IMAGE);
+<<<<<<< HEAD
         float scalew = originBitmap.getWidth()/(float)NET_W_INPUT;
         float scaleh = originBitmap.getHeight()/(float)NET_H_INPUT;
         Bitmap scaleBitmap = Bitmap.createScaledBitmap(originBitmap, NET_W_INPUT, NET_H_INPUT, false);
+=======
+>>>>>>> origin/feature_demo_blazepose
         ImageView source = (ImageView)$(R.id.origin);
         source.setImageBitmap(originBitmap);
         String modelPath = initModel();
         Log.d(TAG, "Init classify " + modelPath);
         int device = 0;
+<<<<<<< HEAD
         if(mUseNPU) {
+=======
+        if(mUseHuaweiNpu) {
+>>>>>>> origin/feature_demo_blazepose
             device = 2;
         }else if(mUseGPU) {
             device = 1;
@@ -188,7 +232,11 @@ public class ImageObjectDetectFragment extends BaseFragment {
         int result = mObjectDetector.init(modelPath, NET_W_INPUT, NET_H_INPUT, 0.7f, 0.3f, -1, device);
         if(result == 0) {
             Log.d(TAG, "detect from image");
+<<<<<<< HEAD
             ObjectDetector.ObjectInfo[] objectInfoList = mObjectDetector.detectFromImage(scaleBitmap, NET_W_INPUT, NET_H_INPUT);
+=======
+            ObjectInfo[] objectInfoList = mObjectDetector.detectFromImage(originBitmap, originBitmap.getWidth(), originBitmap.getHeight());
+>>>>>>> origin/feature_demo_blazepose
             Log.d(TAG, "detect from image result " + objectInfoList);
             int objectCount = 0;
             if (objectInfoList != null) {
@@ -205,14 +253,22 @@ public class ImageObjectDetectFragment extends BaseFragment {
                 ArrayList<Rect> rects = new ArrayList<Rect>();
                 for (int i=0; i<objectInfoList.length; i++)
                 {
+<<<<<<< HEAD
                     rects.add(new Rect((int)(objectInfoList[i].x1 * scalew), (int)(objectInfoList[i].y1 * scaleh), (int)(objectInfoList[i].x2 * scalew), (int)(objectInfoList[i].y2*scaleh)));
+=======
+                    rects.add(new Rect((int)(objectInfoList[i].x1), (int)(objectInfoList[i].y1), (int)(objectInfoList[i].x2), (int)(objectInfoList[i].y2)));
+>>>>>>> origin/feature_demo_blazepose
                 }
                 for (int i=0; i<rects.size(); i++) {
                     Log.d(TAG, "rect " + rects.get(i));
                     Rect rect = rects.get(i);
                     mPaint.setARGB(255, 0, 255, 0);
                     canvas.drawRect(rect, mPaint);
+<<<<<<< HEAD
                     ObjectDetector.ObjectInfo info = objectInfoList[i];
+=======
+                    ObjectInfo info = objectInfoList[i];
+>>>>>>> origin/feature_demo_blazepose
                     if(info.class_id < ObjectDetector.label_list.length) {
                         canvas.drawText(String.format("%s : %f", ObjectDetector.label_list[info.class_id], info.score), rect.left, rect.top - 5, mPaint);
                     }

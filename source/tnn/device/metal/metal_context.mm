@@ -54,6 +54,20 @@ Status MetalContext::GetCommandQueue(void **command_queue) {
     return TNN_OK;
 }
 
+Status MetalContext::ShareCommandQueue(Context* context) {
+    if (!metal_context_impl_) {
+        return Status(TNNERR_DEVICE_LIBRARY_LOAD, "metal context is nil");
+    }
+    auto context_target = dynamic_cast<MetalContext *>(context);
+    if (!context_target) {
+        return Status(TNNERR_DEVICE_LIBRARY_LOAD, "inpute context is not metal context");
+    }
+    
+    metal_context_impl_ = context_target->getMetalContextImpl();
+    
+    return TNN_OK;
+}
+
 Status MetalContext::LoadLibrary(std::vector<std::string> path) {
     if (path.size() <= 0) {
         return Status(TNNERR_DEVICE_LIBRARY_LOAD, "library path is empty");
@@ -224,6 +238,21 @@ Status MetalContext::Synchronize() {
     return [self dispatchEncoder:encoder
                          threads:threads
                  threadsPerGroup:[self threadsPerGroupWithThreads:threads bandwidth:bandwidth]
+                       bandwidth:bandwidth];
+}
+
+- (Status)dispatchEncoder:(id<MTLComputeCommandEncoder>)encoder
+                  threadsPerGroup:(MTLSize)threadsPerGroup
+                  groups:(MTLSize)groups
+                bandwidth:(TNN_NS::MetalBandwidth)bandwidth {
+    MTLSize totalThreads = MTLSizeMake(
+        threadsPerGroup.width  * groups.width,
+        threadsPerGroup.height * groups.height,
+        threadsPerGroup.depth  * groups.depth
+    );
+    return [self dispatchEncoder:encoder
+                         threads:totalThreads
+                 threadsPerGroup:threadsPerGroup
                        bandwidth:bandwidth];
 }
 

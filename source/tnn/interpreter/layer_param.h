@@ -41,6 +41,13 @@ enum ActivationType {
     ActivationType_None  = 0x0000,
     ActivationType_ReLU  = 0x0001,
     ActivationType_ReLU6 = 0x0002,
+    ActivationType_SIGMOID_MUL = 0x0100,
+};
+
+enum FusionType {
+    FusionType_None                = 0x0000,
+    FusionType_Conv_Add_Activation = 0x0001,
+    FusionType_Conv_Activation_Add = 0x0002,
 };
 
 struct BatchNormLayerParam : public LayerParam {
@@ -69,6 +76,7 @@ struct ConvLayerParam : public LayerParam {
     int group           = 1;
     int bias            = 0;
     int activation_type = ActivationType_None;
+    int fusion_type     = FusionType_None;
 };
 
 struct PadLayerParam : public LayerParam {
@@ -109,7 +117,7 @@ struct RoiPoolingLayerParam : public LayerParam {
 };
 
 struct UpsampleLayerParam : public LayerParam {
-    //1: nereast 2:bilinear/linear 3:cubic
+    //1: nereast 2: bilinear/linear 3: cubic
     int mode          = 0;
     int align_corners = 0;
 
@@ -139,7 +147,10 @@ struct NormalizeLayerParam : public LayerParam {
 };
 
 struct ReshapeLayerParam : public LayerParam {
-    int reshape_type = 0;  // meaning what ?
+    // reshape_type:
+    // onnx caffe reshape(nchw): 0
+    // Tensorflow TFLite reshape(nhwc): 1
+    int reshape_type = 0;
     int axis         = 0;
     int num_axes     = 0;
     std::vector<int> shape;
@@ -261,7 +272,10 @@ typedef enum {
     DEQUANT_ONLY = 1,
     // data_type + layout for arm
     QUANT_NCHW4_2_NHWC   = 2,
-    DEQUANT_NHWC_2_NCHW4 = 3
+    DEQUANT_NHWC_2_NCHW4 = 3,
+    // data_type + layout for half data type in armv8.2
+    NC4HW4FP32_2_NC8HW8FP16 = 4,
+    NC8HW8FP16_2_NC4HW4FP32 = 5
     // to be continued
 } ReformatType;
 
@@ -311,6 +325,21 @@ struct DetectionOutputLayerParam : public LayerParam {
     float eta;
 };
 
+struct DetectionPostProcessLayerParam : public LayerParam {
+    int max_detections;
+    int max_classes_per_detection;
+    int detections_per_class;
+    bool use_regular_nms;
+    float nms_score_threshold;
+    float nms_iou_threshold;
+    int num_classes;
+    // y_scale, x_scale, h_scale, w_scale
+    std::vector<float> center_size_encoding;
+    bool has_anchors;
+    int num_anchors;
+    int anchors_coord_num;
+};
+
 struct LRNLayerParam : public LayerParam {
     float alpha;
     float beta;
@@ -320,7 +349,8 @@ struct LRNLayerParam : public LayerParam {
 
 struct ReorgLayerParam : public LayerParam {
     int stride;
-    bool reverse;
+    bool forward;
+    int mode; // DCR: 0  CRD: 1
 };
 
 struct ConstLayerParam : public LayerParam {
@@ -331,6 +361,21 @@ struct SignedMulLayerParam : public LayerParam {
     float alpha = 1.0f;
     float beta  = 1.0f;
     float gamma = 2.0f;
+};
+
+struct SqueezeLayerParam : public LayerParam {
+    std::vector<int> axes;
+};
+
+struct ArgMaxOrMinLayerParam : public LayerParam {
+    int mode;
+    int axis;
+    int keep_dims;
+    int select_last_index;
+};
+
+struct PixelShuffleLayerParam : public LayerParam {
+    int upscale_factor;
 };
 
 }  // namespace TNN_NS

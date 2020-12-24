@@ -13,15 +13,13 @@
 // specific language governing permissions and limitations under the License.
 
 #import "TNNBlazefaceDetectorController.h"
-#import "BlazeFaceDetector.h"
+#import "blazeface_detector.h"
 #import "UIImage+Utility.h"
 #import <Metal/Metal.h>
 #import <cstdlib>
 #import <sstream>
 #import <string>
 #import <tnn/tnn.h>
-
-#define PROFILE 1
 
 using namespace std;
 using namespace TNN_NS;
@@ -76,7 +74,7 @@ using namespace TNN_NS;
 
 - (IBAction)onBtnTNNExamples:(id)sender {
     // check release mode at Product->Scheme when running
-    //运行时请在Product->Scheme中确认意见调整到release模式
+    //运行时请在Product->Scheme中确认已经调整到release模式
     
     // Get metallib path from app bundle
     // PS：A script(Build Phases -> Run Script) is added to copy the metallib
@@ -87,9 +85,11 @@ using namespace TNN_NS;
                                                           ofType:nil];
     auto proto_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface.tnnproto"
                                                           ofType:nil];
-    if (proto_path.length <= 0 || model_path.length <= 0) {
-        self.labelResult.text = @"proto or model path is invalid";
-        NSLog(@"Error: proto or model path is invalid");
+    auto anchor_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface_anchors.txt"
+                                                          ofType:nil];
+    if (proto_path.length <= 0 || model_path.length <= 0 || anchor_path.length <= 0) {
+        self.labelResult.text = @"proto or model or anchor path is invalid";
+        NSLog(@"Error: proto or model or anchor path is invalid");
         return;
     }
 
@@ -103,8 +103,7 @@ using namespace TNN_NS;
         return;
     }
 
-    //auto image_data = utility::UIImageGetData(self.image_orig, target_height, target_width, 1);
-    auto image_data = utility::UIImageGetData(self.image_orig);
+    auto image_data = utility::UIImageGetData(self.image_orig, 128, 128, 1);
 
     TNNComputeUnits units = self.switchGPU.isOn ? TNNComputeUnitsGPU : TNNComputeUnitsCPU;
     auto option = std::make_shared<BlazeFaceDetectorOption>();
@@ -119,7 +118,7 @@ using namespace TNN_NS;
         //min_suppression_thresh
         option->min_suppression_threshold = 0.3;
         //predefined anchor file path
-        option->anchor_path = string([[[NSBundle mainBundle] pathForResource:@"blazeface_anchors.txt" ofType:nil] UTF8String]);
+        option->anchor_path = string(anchor_path.UTF8String);
     }
         
     auto predictor = std::make_shared<BlazeFaceDetector>();
@@ -133,14 +132,8 @@ using namespace TNN_NS;
     BenchOption bench_option;
     bench_option.forward_count = 20;
     predictor->SetBenchOption(bench_option);
-#if PROFILE
-    Timer timer;
-    const std::string tag = (units==TNNComputeUnitsCPU)?"CPU":"GPU";
-#endif
-    //preprocess
-    const int origin_height = (int)CGImageGetHeight(self.image_orig.CGImage);
-    const int origin_width  = (int)CGImageGetWidth(self.image_orig.CGImage);
-    DimsVector image_dims = {1, 3, origin_height, origin_width};
+
+    DimsVector image_dims = {1, 3, 128, 128};
     std::shared_ptr<TNN_NS::Mat> image_mat = nullptr;
 
     if(units == TNNComputeUnitsCPU) {
@@ -159,18 +152,15 @@ using namespace TNN_NS;
                           withBytes:image_data.get()
                         bytesPerRow:image_dims[3] * 4];
     }
-
+    //preprocess
     auto target_dims = predictor->GetInputShape();
     auto input_mat = std::make_shared<TNN_NS::Mat>(image_mat->GetDeviceType(), TNN_NS::N8UC4, target_dims);
-#if PROFILE
-    timer.start();
-    status = predictor->Resize(image_mat, input_mat, TNNInterpLinear);
-    timer.printElapsed(tag, "Resize");
-    printShape("Resize src", image_mat->GetDims());
-    printShape("Resize dst", input_mat->GetDims());
-#else
-    status = predictor->Resize(image_mat, input_mat, TNNInterpLinear);
-#endif
+    status = predictor->Resize(image_mat, input_mat, TNNInterpNearest);
+    if (status != TNN_OK) {
+        self.labelResult.text = [NSString stringWithUTF8String:status.description().c_str()];
+        NSLog(@"Error: %s", status.description().c_str());
+            return;
+    }
 
     std::shared_ptr<TNNSDKOutput> sdk_output = nullptr;
     status = predictor->Predict(std::make_shared<BlazeFaceDetectorInput>(input_mat), sdk_output);

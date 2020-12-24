@@ -13,10 +13,12 @@ set(TNN_VERSION "${TNN_MAJOR_VERSION}.${TNN_MINOR_VERSION}.${TNN_PATCH_VERSION}.
 option(TNN_CPU_ENABLE "Enable Cpu" OFF)
 option(TNN_X86_ENABLE  "Enable X86" OFF)
 option(TNN_ARM_ENABLE "Enable Arm" OFF)
+option(TNN_ARM82_ENABLE "Enable Arm82" OFF)
 option(TNN_METAL_ENABLE "Enable Metal" OFF)
 option(TNN_OPENCL_ENABLE "Enable OpenCL" OFF)
 option(TNN_CUDA_ENABLE "Enable CUDA" OFF)
-option(TNN_NPU_ENABLE "Enable NPU" OFF)
+option(TNN_HUAWEI_NPU_ENABLE "Enable NPU" OFF)
+option(TNN_RK_NPU_ENABLE "Enable RKNPU" OFF)
 
 option(TNN_SYMBOL_HIDE "Enable Hide Symbol Visibility" ON)
 
@@ -29,6 +31,7 @@ option(TNN_QUANTIZATION_ENABLE "Enable Test" OFF)
 option(TNN_MODEL_CHECK_ENABLE "Enable Test" OFF)
 option(TNN_BENCHMARK_MODE "Enable Benchmark" OFF)
 option(TNN_UNIT_TEST_BENCHMARK "Enable Benchmark Layer" OFF)
+option(TNN_CONVERTER_ENABLE "Enable Model Converter" OFF)
 option(TNN_TNN2MEM_ENABLE "Enable tnn2mem" OFF)
 
 message(${CMAKE_SOURCE_DIR})
@@ -46,16 +49,26 @@ if(TNN_PROFILER_ENABLE)
 endif()
 
 if(TNN_BENCHMARK_MODE)
-    add_definitions(-DBENCHMARK)
+    add_definitions(-DGENERATE_RESOURCE)
 endif()
 
 # ignore loop-vectorize warning
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-pass-failed")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pass-failed")
+if(SYSTEM.Windows)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-pass-failed")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-pass-failed")
+endif()
 
 # ignore deprecated warning
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations -Wno-ignored-attributes")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-ignored-attributes")
+if(SYSTEM.Windows)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations -Wno-ignored-attributes")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Wno-ignored-attributes")
+endif()
 
 if(DEBUG)
     set(TNN_SYMBOL_HIDE OFF)
@@ -80,10 +93,12 @@ endif()
 
 if(TNN_UNIT_TEST_ENABLE)
     enable_testing()
-    if (TNN_UNIT_TEST_BENCHMARK MATCHES OFF)
-        add_definitions(-DOPENCL_FORCE_FP32)
-    endif()
     set(TNN_CPU_ENABLE ON)
+    set(TNN_SYMBOL_HIDE OFF)
+    add_definitions(-DGENERATE_RESOURCE)
+endif()
+
+if(TNN_CONVERTER_ENABLE)
     set(TNN_SYMBOL_HIDE OFF)
 endif()
 
@@ -93,8 +108,17 @@ if(TNN_QUANTIZATION_ENABLE OR TNN_MODEL_CHECK_ENABLE)
 endif()
 
 if(TNN_MODEL_CHECK_ENABLE)
-    add_definitions(-DOPENCL_FORCE_FP32)
     option(TNN_METAL_FLOAT32 "Enable Metal Float32" ON)
+endif()
+
+if(TNN_ARM82_ENABLE)
+    add_definitions(-DTNN_ARM82=1)
+endif()
+
+# only used to simulate arm82 computation in the unit test
+option(TNN_ARM82_SIMU "Enable arm82 simulation" OFF)
+if(TNN_ARM82_SIMU)
+    add_definitions(-DTNN_ARM82_SIMU)
 endif()
 
 if(TNN_METAL_FLOAT32)
@@ -142,10 +166,12 @@ message(STATUS "\tProcessor: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "\tCpu:\t${TNN_CPU_ENABLE}")
 message(STATUS "\tX86:\t${TNN_X86_ENABLE}")
 message(STATUS "\tArm:\t${TNN_ARM_ENABLE}")
+message(STATUS "\tArm82:\t${TNN_ARM82_ENABLE}")
 message(STATUS "\tMetal:\t${TNN_METAL_ENABLE}")
 message(STATUS "\tOpenCL:\t${TNN_OPENCL_ENABLE}")
 message(STATUS "\tCUDA:\t${TNN_CUDA_ENABLE}")
-message(STATUS "\tNPU:\t${TNN_NPU_ENABLE}")
+message(STATUS "\tHuaweiNPU:\t${TNN_HUAWEI_NPU_ENABLE}")
+message(STATUS "\tRKNPU:\t${TNN_RK_NPU_ENABLE}")
 message(STATUS "\tOpenMP:\t${TNN_OPENMP_ENABLE}")
 message(STATUS "\tTEST:\t${TNN_TEST_ENABLE}")
 message(STATUS "\t--Unit Test:\t${TNN_UNIT_TEST_ENABLE}")
@@ -155,6 +181,7 @@ message(STATUS "\tDEBUG:\t${DEBUG}")
 message(STATUS "\tPROFILE:\t${TNN_PROFILER_ENABLE}")
 message(STATUS "\tBENCHMARK:\t${TNN_BENCHMARK_MODE}")
 message(STATUS "\tBENCHMARK Layer:\t${TNN_UNIT_TEST_BENCHMARK}")
+message(STATUS "\tModel Converter:\t${TNN_CONVERTER_ENABLE}")
 message(STATUS "\tTNN2MEM:\t${TNN_TNN2MEM_ENABLE}")
 
 include_directories(include)
@@ -173,6 +200,10 @@ file(GLOB_RECURSE SRC "source/tnn/core/*.h"
                       "source/tnn/memory_manager/*.h"
                       "source/tnn/memory_manager/*.cc")
 
+if(TNN_SYMBOL_HIDE AND UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+endif()
+
 if(TNN_CPU_ENABLE)
     add_subdirectory(source/tnn/device/cpu)
     set(TARGET_OBJECTS ${TARGET_OBJECTS} "$<TARGET_OBJECTS:TNNCpu>")
@@ -189,6 +220,11 @@ if(TNN_X86_ENABLE)
 endif()
 
 if(TNN_OPENCL_ENABLE)
+    include(FindPythonInterp REQUIRED)
+    if (NOT PYTHON_EXECUTABLE)
+        message (FATAL_ERROR "No Python installation found! It is required by OpenCL codegen.")
+    endif ()
+
     if(SHARING_MEM_WITH_OPENGL)
         add_definitions(-DSHARING_MEM_WITH_OPENGL)
         add_definitions(-DCL_HPP_TARGET_OPENCL_VERSION=120)
@@ -207,26 +243,32 @@ if(TNN_CUDA_ENABLE)
     set(TARGET_OBJECTS ${TARGET_OBJECTS} "$<TARGET_OBJECTS:TNNCuda>")
 endif()
 
-if(TNN_NPU_ENABLE)
+if(TNN_HUAWEI_NPU_ENABLE)
     if(ANDROID_ABI STREQUAL "armeabi-v7a")
         link_directories(
-                ./third_party/npu/hiai_ddk_latest/armeabi-v7a/
+                third_party/huawei_npu/hiai_ddk_latest/armeabi-v7a/
         )
     else()
         link_directories(
-                ./third_party/npu/hiai_ddk_latest/arm64-v8a/
+                third_party/huawei_npu/hiai_ddk_latest/arm64-v8a/
         )
     endif()
-    add_subdirectory(source/tnn/device/npu)
-    if(TNN_CPU_ENABLE)
-        set(TARGET_OBJECTS ${TARGET_OBJECTS} "$<TARGET_OBJECTS:TNNNPU>")
-    else()
-        set(TARGET_OBJECTS ${TARGET_OBJECTS} "$<TARGET_OBJECTS:TNNNPU>" "$<TARGET_OBJECTS:TNNBLOB>")
-    endif()
+    add_subdirectory(source/tnn/device/huawei_npu)
+    set(TARGET_OBJECTS ${TARGET_OBJECTS} "$<TARGET_OBJECTS:TNNNPU>")
 endif()
 
-if(TNN_SYMBOL_HIDE AND UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+if(TNN_RK_NPU_ENABLE)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        link_directories(
+                ./third_party/rknpu/rknpu_ddk/lib64/
+        )
+    else()
+        link_directories(
+                ./third_party/rknpu/rknpu_ddk/lib/
+        )
+    endif()
+    add_subdirectory(source/tnn/device/rknpu)
+    set(TARGET_OBJECTS ${TARGET_OBJECTS} "$<TARGET_OBJECTS:TNNRKNPU>")
 endif()
 
 if(TNN_BUILD_SHARED)
@@ -261,12 +303,28 @@ if(TNN_MODEL_CHECK_ENABLE)
     add_subdirectory(tools/model_check)
 endif()
 
-if(TNN_TEST_ENABLE)
+
+if (TNN_TEST_ENABLE OR TNN_CONVERTER_ENABLE)
     add_subdirectory(third_party/gflags)
+    get_target_property(GFLAGS_INCLUDE_DIRS gflags INTERFACE_INCLUDE_DIRECTORIES)
+    include_directories(BEFORE "${GFLAGS_INCLUDE_DIRS}")
+endif ()
+
+
+if(TNN_TEST_ENABLE)
     add_subdirectory(test)
 endif()
 
+if(TNN_CONVERTER_ENABLE)
+    add_subdirectory(third_party/flatbuffers)
+    add_subdirectory(tools/converter)
+endif()
+
 if(TNN_COVERAGE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage -fprofile-arcs -ftest-coverage")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -coverage -lgcov")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -coverage -fprofile-arcs -ftest-coverage")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -coverage -lgcov")
+    endif()
 endif()

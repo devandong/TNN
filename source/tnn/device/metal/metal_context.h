@@ -61,6 +61,8 @@ public:
     // @brief get tnn command queue
     // @param command_queue device command queue for forward
     Status GetCommandQueue(void **command_queue);
+    // @brief share tnn command queue to another context
+    Status ShareCommandQueue(Context* context);
 
     virtual Status LoadLibrary(std::vector<std::string> path);
     virtual Status OnInstanceForwardBegin();
@@ -119,6 +121,18 @@ private:
 - (Status)dispatchEncoder:(id<MTLComputeCommandEncoder>)encoder
                 threads:(MTLSize)threads
                 bandwidth:(TNN_NS::MetalBandwidth)bandwidth;
+
+/**
+ * @brief dispatch encoder with specified settings
+ * @param encoder           command encoder
+ * @param threadsPerGroup   threadsPerGroup size
+ * @param groups            threadGroups
+ * @param bandwidth         bandwidth
+ */
+- (Status)dispatchEncoder:(id<MTLComputeCommandEncoder>)encoder
+                  threadsPerGroup:(MTLSize)threadsPerGroup
+                  groups:(MTLSize)groups
+                  bandwidth:(TNN_NS::MetalBandwidth)bandwidth;
 
 /**
  * @brief befor instace forword

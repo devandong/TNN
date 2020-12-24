@@ -14,14 +14,23 @@
         protobuf >= 3.0
         
 
-## NPU Compilation Prerequisite:
+## Huawei NPU Compilation Prerequisite:
+You need the ddk to support where you could obain by 
+Either 
+Option 1 :
+Go to <path_to_tnn>/thrid_party/huawei_npu/, use ./download_ddk.sh to download the ddk.
+````
+cd <path_to_tnn>/thrid_party/huawei_npu/
+./download_ddk.sh 
+````
+Option 2 :
 1. Downlaod DDK from the following path [https://developer.huawei.com/consumer/cn/doc/overview/HUAWEI_HiAI]
 2. unzip 
 3. Go to the `ddk/ai_ddk_lib` directory under the downloaded folder 
-4. Make directory named by `armeabi-v7a`under  `<path_to_tnn>/third_party/npu/hiai_ddk_latest/`, and opy all files under the `ddk/ai_ddk_lib/lib` directory to `<path_to_tnn>/third_party/npu/hiai_ddk_latest/armeabi-v7a`
-5.  Make directory named by `arm64-v8a`under  `<path_to_tnn>/third_party/npu/hiai_ddk_latest/`,and copy all files under the `ddk/ai_ddk_lib/lib64` directory to  `<path_to_tnn>/third_party/npu/hiai_ddk_latest/arm64-v8a`
-6. Copy the `include` directory to `<path_to_tnn>>/third_party/npu/hiai_ddk_latest/`
-7. The structure of the `<path_to_tnn>/third_party/npu/hiai_ddk_latest/` should be like：
+4. Make directory named by `armeabi-v7a`under  `<path_to_tnn>/third_party/huawei_npu/hiai_ddk_latest/`, and opy all files under the `ddk/ai_ddk_lib/lib` directory to `<path_to_tnn>/third_party/huawei_npu/hiai_ddk_latest/armeabi-v7a`
+5.  Make directory named by `arm64-v8a`under  `<path_to_tnn>/third_party/huawei_npu/hiai_ddk_latest/`,and copy all files under the `ddk/ai_ddk_lib/lib64` directory to  `<path_to_tnn>/third_party/huawei_npu/hiai_ddk_latest/arm64-v8a`
+6. Copy the `include` directory to `<path_to_tnn>>/third_party/huawei_npu/hiai_ddk_latest/`
+7. The structure of the `<path_to_tnn>/third_party/huawei_npu/hiai_ddk_latest/` should be like：
 
 ```
 hiai_ddk_latest
@@ -77,6 +86,10 @@ hiai_ddk_latest
 ## How to update the latest ROM version to support NPU?
 * Go to Settings > System and Update > Software Update
     
+## RKNPU Compilation Prerequisite:
+1. Make directory named by `rknpu` under `<path_to_tnn>/third_party` and enter `rknpu`, then execute: `git clone https://github.com/airockchip/rknpu_ddk.git`
+2. Add `-DTNN_RK_NPU_ENABLE:BOOL=ON` to `<path_to_tnn>/scripts/build_aarch64_linux.sh` and execute it, if the compile fail, please set `TNN_CPU_ENABLE` to `ON` and try again.
+
 ## Model support:
 
 ### How to support tensorflow, caffe, mxnet models?

@@ -34,7 +34,9 @@ enum class MatConverterType
     Copy = 1,
     Resize = 2,
     Crop = 3,
-    WarpAffine = 4
+    WarpAffine = 4,
+    CvtColor = 5,
+    CopyMakeBorder = 6
 };
 
 struct MatConverterTestParam
@@ -46,6 +48,10 @@ struct MatConverterTestParam
     CropParam crop_param;
     // WarpAffine
     WarpAffineParam warp_affine_param;
+    // CvtColor
+    ColorConversionType cvt_type = COLOR_CONVERT_NV12TOBGR;
+    // CopyMakeBorder
+    CopyMakeBorderParam copy_make_border_param;
 
     // for Copy
     MatConverterTestParam(MatConverterType converter_type) :
@@ -90,6 +96,22 @@ struct MatConverterTestParam
         warp_affine_param.border_type       = border_type;
         warp_affine_param.border_val        = border_val;
     }
+
+    // for CvtColor
+    MatConverterTestParam(MatConverterType converter_type, ColorConversionType type) :
+        mat_converter_type(converter_type), cvt_type(type) { }
+
+    // for CopyMakeBorder
+    MatConverterTestParam(MatConverterType converter_type, int top, int bottom, int left, int right,
+                          BorderType border_type, float border_val) :
+        mat_converter_type(converter_type) {
+        copy_make_border_param.top         = top;
+        copy_make_border_param.bottom      = bottom;
+        copy_make_border_param.left        = left;
+        copy_make_border_param.right       = right;
+        copy_make_border_param.border_type = border_type;
+        copy_make_border_param.border_val  = border_val;
+    }
 };
 
 class MatConverterTest : public ::testing::TestWithParam<std::tuple<int, int, int, MatType, MatConverterTestParam>> {
@@ -101,6 +123,19 @@ protected:
     int Compare(Blob* cpu_blob, Blob* device_blob);
     int CreateTestData(int batch, int channel, int input_size, MatType mat_type, int output_size);
     int DestroyTestData();
+
+    bool OpenCLTestFilter(const DeviceType& device_type, const MatType& mat_type);
+    bool MetalTestFilter(const DeviceType& device_type, const MatType& mat_type,
+                         const MatConverterType& mat_converter_type, const int batch);
+    bool MatChannelCheck(const MatType& mat_type, const int channel);
+    bool CvtColorCheck(const DeviceType& device_type, const MatType& mat_type,
+                       const MatConverterType& mat_converter_type,
+                       const ColorConversionType& cvt_type,
+                       const int input_size);
+    void GetOutputSize(const MatConverterTestParam& mat_converter_test_param,
+                       const MatConverterType& mat_converter_type,
+                       const int input_size,
+                       int& output_size);
 
     void* mat_in_data_;
     void* mat_out_ref_data_;
