@@ -57,6 +57,15 @@ using namespace std;
 - (void)setupTNNExampleDataSource {
     auto examples = [NSMutableArray array];
     
+    // 遍历图片列表，自定义内部demo
+    {
+        auto data = [TNNExampleData new];
+        data.title = @"自定义";
+        data.desc = @"图像类 - 遍历图像列表";
+        data.viewControllerID = @"TNNImageListDemoRunner";
+        [examples addObject:data];
+    }
+    
     //人脸检测 - Ultra Fast
     {
         auto data = [TNNExampleData new];

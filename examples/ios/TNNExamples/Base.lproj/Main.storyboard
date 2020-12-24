@@ -9,7 +9,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--TNNImageListDemoRunner-->
+        <!--TNNFaceDetectorController-->
         <scene sceneID="W3c-4Z-HUS">
             <objects>
                 <viewController storyboardIdentifier="TNNFaceDetectorController" id="BYZ-38-t0r" customClass="TNNFaceDetectorController" sceneMemberID="viewController">
@@ -78,7 +78,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="357.60000000000002" y="26.53673163418291"/>
+            <point key="canvasLocation" x="-76" y="-695"/>
         </scene>
         <!--TNNObjectDetectorController-->
         <scene sceneID="QXE-Uc-qAl">
@@ -149,7 +149,76 @@
             </objects>
             <point key="canvasLocation" x="-500" y="798.35082458770626"/>
         </scene>
-        <!--TNNImageClassifyController-->
+        <!--TNNImageListDemoRunner-->
+        <scene sceneID="F55-5Z-Mia">
+            <objects>
+                <viewController storyboardIdentifier="TNNImageListDemoRunner" id="gA9-9s-Ec8" userLabel="TNNImageListDemoRunner" customClass="TNNImageListDemoRunner" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Bcv-19-Eu0" userLabel="View">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="758"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wFF-UL-DP2">
+                                <rect key="frame" x="26" y="59" width="323" height="321"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vNv-Po-5Y7">
+                                <rect key="frame" x="205" y="678" width="122" height="48"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                <color key="backgroundColor" systemColor="linkColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="19"/>
+                                <state key="normal" title="run">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="onBtnTNNExamples:" destination="gA9-9s-Ec8" eventType="touchUpInside" id="5t3-6m-IoR"/>
+                                </connections>
+                            </button>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="Jia-zd-QDn">
+                                <rect key="frame" x="105" y="686" width="49" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                                <connections>
+                                    <action selector="onSwitchChanged:" destination="gA9-9s-Ec8" eventType="valueChanged" id="mcI-FU-8fV"/>
+                                </connections>
+                            </switch>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="GPU" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SVp-4d-712">
+                                <rect key="frame" x="50" y="691" width="35" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" lineBreakMode="tailTruncation" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zkp-Kk-Wuy" userLabel="Label Result">
+                                <rect key="frame" x="45" y="448" width="285" height="51"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="PDS-oc-aUr"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="Wvv-Fs-IEB" userLabel="TNNImageListDemoRunner">
+                        <barButtonItem key="rightBarButtonItem" title="Item" id="6kM-gL-h2l" userLabel="Compose">
+                            <connections>
+                                <segue destination="jDT-gM-iHE" kind="show" id="Akv-Mf-cH5"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="btnRun" destination="vNv-Po-5Y7" id="dsN-Xi-72w"/>
+                        <outlet property="imageView" destination="wFF-UL-DP2" id="92C-sO-Bos"/>
+                        <outlet property="labelGPU" destination="SVp-4d-712" id="vHh-uQ-Ilj"/>
+                        <outlet property="labelResult" destination="zkp-Kk-Wuy" id="1AW-xm-gXP"/>
+                        <outlet property="switchGPU" destination="Jia-zd-QDn" id="ULm-Jg-Vsr"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Gj5-c1-QHz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1130.4000000000001" y="1532.5123152709359"/>
+        </scene>
+        <!--Image Classify Controller-->
         <scene sceneID="ySD-2M-GbC">
             <objects>
                 <viewController storyboardIdentifier="TNNImageClassifyController" id="5Zr-9o-llY" customClass="TNNImageClassifyController" sceneMemberID="viewController">
@@ -164,9 +233,6 @@
                                 <state key="normal" title="Run">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
-                                <connections>
-                                    <action selector="onBtnTNNExamples:" destination="8dj-aO-8mp" eventType="touchUpInside" id="Fjf-Kb-bIV"/>
-                                </connections>
                             </button>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u6U-Ip-bJl">
                                 <rect key="frame" x="15" y="15" width="345" height="500"/>
@@ -175,9 +241,6 @@
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="jvR-9y-nPz">
                                 <rect key="frame" x="82" y="679" width="51" height="31"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <connections>
-                                    <action selector="onSwitchChanged:" destination="8dj-aO-8mp" eventType="valueChanged" id="PbA-kc-tTl"/>
-                                </connections>
                             </switch>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="GPU" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ADi-Uz-g9m">
                                 <rect key="frame" x="30" y="685" width="35" height="17"/>
@@ -206,13 +269,6 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
-                    <connections>
-                        <outlet property="btnExamples" destination="foy-mE-wNR" id="UiM-kl-ODc"/>
-                        <outlet property="imageView" destination="AJb-7j-RD4" id="iiy-y5-eSJ"/>
-                        <outlet property="labelGPU" destination="w5v-8d-e5c" id="Wll-Zn-wMF"/>
-                        <outlet property="labelResult" destination="NQs-5S-ymA" id="FNn-Yq-w58"/>
-                        <outlet property="switchGPU" destination="SGe-GE-WWH" id="Uk0-0A-d1M"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="o1t-4f-8cK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -349,7 +405,7 @@
                         <segue destination="aqD-Jk-Yfl" kind="show" id="uBb-25-v2q"/>
                         <segue destination="X5Q-FQ-x2r" kind="show" id="h50-uG-JzL"/>
                         <segue destination="Pzy-Q2-Mw4" kind="show" id="r4k-fv-Y5N"/>
-                        <segue destination="8dj-aO-8mp" kind="show" id="QzD-lh-ws0"/>
+                        <segue destination="gA9-9s-Ec8" kind="show" id="HDf-2n-XAB"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9yb-bE-TQ2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -359,7 +415,6 @@
         <!--Root Nav Controller-->
         <scene sceneID="93y-QD-ePb">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="ztT-Du-Oi3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <navigationController id="1C3-Qb-WYm" customClass="RootNavController" sceneMemberID="viewController">
                     <navigationItem key="navigationItem" id="UK1-XK-fSl"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="BzZ-xa-nSS">
@@ -370,6 +425,7 @@
                         <segue destination="jDT-gM-iHE" kind="relationship" relationship="rootViewController" id="dMd-lu-AIk"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ztT-Du-Oi3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-354" y="27"/>
         </scene>
@@ -803,10 +859,13 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="lkg-b7-2yB"/>
+        <segue reference="Akv-Mf-cH5"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="camera_rotate_fill.png" width="200" height="200"/>
+        <systemColor name="linkColor">
+            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

@@ -18,11 +18,15 @@
 #import "object_detector_yolo.h"
 #import "ultra_face_detector.h"
 #import "skeleton_detector.h"
+#import "hair_segmentation.h"
+#import "pose_detect_landmark.h"
+
 #import "UIImage+Utility.h"
 #import <Metal/Metal.h>
 #import <cstdlib>
 #import <sstream>
 #import <string>
+#import <fstream>
 #import <tnn/tnn.h>
 
 using namespace std;
@@ -31,12 +35,12 @@ using namespace TNN_NS;
 #define PROFILE 0
 
 @interface TNNImageListDemoRunner ()
-
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UISwitch *switchGPU;
 @property (weak, nonatomic) IBOutlet UILabel *labelGPU;
 @property (weak, nonatomic) IBOutlet UILabel *labelResult;
-@property (weak, nonatomic) IBOutlet UIButton *btnExamples;
+@property (weak, nonatomic) IBOutlet UIButton *btnRun;
+
 
 @property(nonatomic, strong) UIImage* image_orig;
 
@@ -70,8 +74,11 @@ using namespace TNN_NS;
     }];
     // sort according to the name, ensure the images are processed frame by frame
     [self.result sortUsingSelector:@selector(localizedStandardCompare:)];
-    self.image_orig = [UIImage imageWithContentsOfFile:self.result[0]];
-    self.imageView.image = self.image_orig;
+    bool hasImages = self.result.count > 0;
+    if (hasImages) {
+        self.image_orig = [UIImage imageWithContentsOfFile:self.result[0]];
+        self.imageView.image = self.image_orig;
+    }
 
     auto view = self.labelResult.superview;
     [self.imageView removeFromSuperview];
@@ -88,6 +95,10 @@ using namespace TNN_NS;
                    self.imageView.frame.origin.y + height + 5 - self.labelResult.frame.size.height / 2,
                    self.labelResult.frame.size.width, self.labelResult.frame.size.height);
     [view addSubview:self.labelResult];
+    
+    if (hasImages == false) {
+        self.labelResult.text = @"No images in 'decoded_images/', please check!";
+    }
     
 }
 
@@ -130,7 +141,9 @@ using namespace TNN_NS;
     //face align
     //[self runYoutuFaceAlign];
     //skeleton
-    [self runSkeleton];
+    //[self runSkeleton];
+    // blazepose
+    [self runPoseDetectLandmark];
 }
 
 /*
@@ -457,6 +470,156 @@ using namespace TNN_NS;
     return predictor;
 }
 
+- (std::shared_ptr<HairSegmentation>) loadHairSegmentation {
+    std::shared_ptr<HairSegmentation> predictor = nullptr;
+    Status status = TNN_OK;
+    
+    auto library_path = [[NSBundle mainBundle] pathForResource:@"tnn.metallib" ofType:nil];
+    auto model_path = [[NSBundle mainBundle] pathForResource:@"model/hair_segmentation/segmentation.tnnmodel"
+                                                          ofType:nil];
+    auto proto_path = [[NSBundle mainBundle] pathForResource:@"model/hair_segmentation/segmentation.tnnproto"
+                                                          ofType:nil];
+    if (proto_path.length <= 0 || model_path.length <= 0) {
+        status = Status(TNNERR_NET_ERR, "Error: proto or model path is invalid");
+        NSLog(@"Error: proto or model path is invalid");
+        return predictor;
+    }
+
+    NSString *protoFormat = [NSString stringWithContentsOfFile:proto_path
+    encoding:NSUTF8StringEncoding
+       error:nil];
+    string proto_content =
+        protoFormat.UTF8String;
+    NSData *data = [NSData dataWithContentsOfFile:model_path];
+    string model_content = [data length] > 0 ? string((const char *)[data bytes], [data length]) : "";
+    if (proto_content.size() <= 0 || model_content.size() <= 0) {
+        status = Status(TNNERR_NET_ERR, "Error: proto or model path is invalid");
+        NSLog(@"Error: proto or model path is invalid");
+        return predictor;
+    }
+
+    TNNComputeUnits units = self.switchGPU.isOn ? TNNComputeUnitsGPU : TNNComputeUnitsCPU;
+    auto option = std::make_shared<HairSegmentationOption>();
+    {
+        option->proto_content = proto_content;
+        option->model_content = model_content;
+        option->library_path = library_path.UTF8String;
+        option->compute_units = units;
+
+        option->mode = 1;
+    }
+        
+    predictor = std::make_shared<HairSegmentation>();
+    status = predictor->Init(option);
+    
+    BenchOption bench_option;
+    bench_option.forward_count = 1;
+    predictor->SetBenchOption(bench_option);
+    
+    return predictor;
+}
+
+-(std::shared_ptr<PoseDetectLandmark>)loadDetectLandmark:(TNNComputeUnits)units {
+    Status status = TNN_OK;
+    std::shared_ptr<PoseDetectLandmark> predictor = nullptr;
+    
+    // load pose_detector
+    std::shared_ptr<TNNSDKSample> pose_detector = nullptr;
+    {
+        auto library_path = [[NSBundle mainBundle] pathForResource:@"tnn.metallib" ofType:nil];
+        auto model_path   = [[NSBundle mainBundle] pathForResource:@"model/blazepose/pose_detection.tnnmodel"
+                                                          ofType:nil];
+        auto proto_path   = [[NSBundle mainBundle] pathForResource:@"model/blazepose/pose_detection.tnnproto"
+                                                          ofType:nil];
+        if (proto_path.length <= 0 || model_path.length <= 0) {
+            LOGE("Error: proto or model or anchor path is invalid\n");
+            return predictor;
+        }
+
+        string proto_content =
+            [NSString stringWithContentsOfFile:proto_path encoding:NSUTF8StringEncoding error:nil].UTF8String;
+        NSData *data_mode    = [NSData dataWithContentsOfFile:model_path];
+        string model_content = [data_mode length] > 0 ? string((const char *)[data_mode bytes], [data_mode length]) : "";
+        if (proto_content.size() <= 0 || model_content.size() <= 0) {
+            LOGE("Error: proto or model path is invalid\n");
+            return predictor;
+        }
+
+        auto option = std::make_shared<BlazePoseDetectorOption>();
+        {
+            option->proto_content = proto_content;
+            option->model_content = model_content;
+            option->library_path = library_path.UTF8String;
+            option->compute_units = units;
+
+            option->min_score_threshold = 0.5;
+            option->min_suppression_threshold = 0.3;
+        }
+
+        pose_detector = std::make_shared<BlazePoseDetector>();
+        auto status = pose_detector->Init(option);
+        if (status != TNN_OK) {
+            LOGE("Error: %s\n", status.description().c_str());
+            return nullptr;
+        }
+    }
+    // load full_body pose landmark
+    std::shared_ptr<BlazePoseLandmark> pose_landmark = nullptr;
+    bool full_body = true;
+    {
+        auto library_path = [[NSBundle mainBundle] pathForResource:@"tnn.metallib" ofType:nil];
+        auto model_path   = [[NSBundle mainBundle] pathForResource:@"model/blazepose/pose_landmark_upper_body.tnnmodel"
+                                                          ofType:nil];
+        auto proto_path   = [[NSBundle mainBundle] pathForResource:@"model/blazepose/pose_landmark_upper_body.tnnproto"
+                                                          ofType:nil];
+        if (full_body) {
+            model_path = [[NSBundle mainBundle] pathForResource:@"model/blazepose/pose_landmark_full_body.tnnmodel"
+                                                        ofType:nil];
+            proto_path = [[NSBundle mainBundle] pathForResource:@"model/blazepose/pose_landmark_full_body.tnnproto"
+                                                        ofType:nil];
+        }
+        if (proto_path.length <= 0 || model_path.length <= 0) {
+            LOGE("Error: proto or model or anchor path is invalid\n");
+            return nullptr;
+        }
+
+        string proto_content =
+            [NSString stringWithContentsOfFile:proto_path encoding:NSUTF8StringEncoding error:nil].UTF8String;
+        NSData *data_mode    = [NSData dataWithContentsOfFile:model_path];
+        string model_content = [data_mode length] > 0 ? string((const char *)[data_mode bytes], [data_mode length]) : "";
+        if (proto_content.size() <= 0 || model_content.size() <= 0) {
+            LOGE("Error: proto or model path is invalid\n");
+            return nullptr;
+        }
+
+        auto option = std::make_shared<BlazePoseLandmarkOption>();
+        {
+            option->proto_content = proto_content;
+            option->model_content = model_content;
+            option->library_path = library_path.UTF8String;
+            option->compute_units = units;
+
+            option->pose_presence_threshold = 0.5;
+            option->landmark_visibility_threshold = 0.1;
+            option->full_body = full_body;
+        }
+
+        pose_landmark = std::make_shared<BlazePoseLandmark>();
+        auto status = pose_landmark->Init(option);
+        if (status != TNN_OK) {
+            LOGE("Error: %s\n", status.description().c_str());
+            return nullptr;
+        }
+    }
+    
+    {
+        predictor = std::make_shared<PoseDetectLandmark>();
+        auto status = predictor->Init({pose_detector, pose_landmark});
+        if (status != TNN_OK)
+            return nullptr;
+    }
+    return predictor;
+}
 
 /*
  Model runner.
@@ -1032,6 +1195,193 @@ using namespace TNN_NS;
 #else
             // write to album on real device
             UIImageWriteToSavedPhotosAlbum(output_image, nil, nil, nil);
+#endif
+        }
+    }
+}
+
+-(void) runHairSegmentation {
+    
+    const int image_orig_height = (int)CGImageGetHeight(self.image_orig.CGImage);
+    const int image_orig_width  = (int)CGImageGetWidth(self.image_orig.CGImage);
+    TNN_NS::DimsVector orig_image_dims = {1, 4, image_orig_height, image_orig_width};
+    
+    auto predictor = [self loadHairSegmentation];
+    std::vector<RGBA> colors = {
+        //蓝色
+        {0,0,185,90},
+        //青色
+        {0,185,185,40},
+        //绿色
+        {0,185,0,50},
+        //紫色
+        {185,0,185,64},
+        //红色
+        {185,0,0,64},
+    };
+    predictor->SetHairColor(colors[0]);
+    
+    int idx = 0;
+    for (NSString * img_path in self.result) {
+        @autoreleasepool {
+            LOGE("processing image[%d]:%s\n", idx++,  [[img_path lastPathComponent] UTF8String]);
+            auto input_image = [UIImage imageWithContentsOfFile:img_path];
+            auto image_data = utility::UIImageGetData(input_image);
+            
+            Status status = TNN_OK;
+            
+            std::shared_ptr<TNNSDKOutput> sdk_output = nullptr;
+            auto compute_units = predictor->GetComputeUnits();
+            if (compute_units == TNNComputeUnitsGPU) {
+                auto image_mat = std::make_shared<TNN_NS::Mat>(DEVICE_METAL, TNN_NS::N8UC4, orig_image_dims);
+                
+                id<MTLTexture> texture_rgba = (__bridge id<MTLTexture>)image_mat->GetData();
+                if (!texture_rgba) {
+                    self.labelResult.text = @"Error texture input rgba is nil";
+                    NSLog(@"Error texture input rgba is nil");
+                    return;
+                }
+                
+                [texture_rgba replaceRegion:MTLRegionMake2D(0, 0, image_orig_width, image_orig_height)
+                                mipmapLevel:0
+                                  withBytes:image_data.get()
+                                bytesPerRow:image_orig_width * 4];
+                status = predictor->Predict(std::make_shared<TNNSDKInput>(image_mat), sdk_output);
+            } else if (compute_units == TNNComputeUnitsCPU) {
+                auto image_mat = std::make_shared<TNN_NS::Mat>(DEVICE_ARM, TNN_NS::N8UC4, orig_image_dims, image_data.get());
+                status = predictor->Predict(std::make_shared<TNNSDKInput>(image_mat), sdk_output);
+            }
+            if (status != TNN_OK) {
+                NSLog(@"Error: %s", status.description().c_str());
+                return;
+            }
+            
+            ImageInfo image;
+            if (sdk_output && dynamic_cast<HairSegmentationOutput *>(sdk_output.get())) {
+                auto output = dynamic_cast<HairSegmentationOutput *>(sdk_output.get());
+                //auto merged_image = output->merged_image;
+                image = output->merged_image;
+            }
+            if (!image.data) {
+                NSLog(@"no output!");
+            }
+            UIImage* output_image = utility::UIImageWithDataRGBA(image.data.get(), image.image_height, image.image_width);
+            
+            //save output image
+#if TARGET_IPHONE_SIMULATOR
+            // save image on simulator
+            NSString *out_name = [[img_path lastPathComponent] stringByReplacingOccurrencesOfString: @".jpg" withString:@"_out.jpg"];
+            const std::string save_dir = "/Users/devandong/Desktop/output_img/hair_segmentation/color1/";
+            std::string save_path = save_dir+string([out_name UTF8String]);
+            NSString *path = [NSString stringWithCString:save_path.c_str()
+                                                encoding:[NSString defaultCStringEncoding]];
+            [UIImageJPEGRepresentation(output_image, 1.0) writeToFile:path atomically:YES];
+#else
+            // write to album on real device
+            //UIImageWriteToSavedPhotosAlbum(output_image, nil, nil, nil);
+#endif
+        }
+    }
+}
+
+-(void) runPoseDetectLandmark {
+    //clear result
+    self.labelResult.text = nil;
+    
+    TNNComputeUnits compute_units = self.switchGPU.isOn ? TNNComputeUnitsGPU : TNNComputeUnitsCPU;
+    if(compute_units == TNNComputeUnitsCPU) {
+        LOGE("run ARM model!\n");
+    } else {
+        LOGE("run Metal model!\n");
+    }
+    //load models
+    auto detect_landmark = [self loadDetectLandmark:compute_units];
+    //image info
+    const int image_orig_height = (int)CGImageGetHeight(self.image_orig.CGImage);
+    const int image_orig_width  = (int)CGImageGetWidth(self.image_orig.CGImage);
+    TNN_NS::DimsVector orig_image_dims = {1, 4, image_orig_height, image_orig_width};
+    
+    int idx = 0;
+    for (NSString * img_path in self.result) {
+        @autoreleasepool {
+            LOGE("processing image[%d]:%s\n", idx++,  [[img_path lastPathComponent] UTF8String]);
+            auto input_image = [UIImage imageWithContentsOfFile:img_path];
+            auto image_data = utility::UIImageGetData(input_image);
+            
+            Status status = TNN_OK;
+            std::shared_ptr<TNNSDKOutput> sdk_output = nullptr;
+            if (compute_units == TNNComputeUnitsGPU) {
+                auto image_mat = std::make_shared<TNN_NS::Mat>(DEVICE_METAL, TNN_NS::N8UC4, orig_image_dims);
+                
+                id<MTLTexture> texture_rgba = (__bridge id<MTLTexture>)image_mat->GetData();
+                if (!texture_rgba) {
+                    self.labelResult.text = @"Error texture input rgba is nil";
+                    NSLog(@"Error texture input rgba is nil");
+                    return;
+                }
+                
+                [texture_rgba replaceRegion:MTLRegionMake2D(0, 0, image_orig_width, image_orig_height)
+                                mipmapLevel:0
+                                  withBytes:image_data.get()
+                                bytesPerRow:image_orig_width * 4];
+                status = detect_landmark->Predict(std::make_shared<TNNSDKInput>(image_mat), sdk_output);
+            } else if (compute_units == TNNComputeUnitsCPU) {
+                auto image_mat = std::make_shared<TNN_NS::Mat>(DEVICE_ARM, TNN_NS::N8UC4, orig_image_dims, image_data.get());
+                status = detect_landmark->Predict(std::make_shared<TNNSDKInput>(image_mat), sdk_output);
+            }
+            if (status != TNN_OK) {
+                NSLog(@"Error: %s", status.description().c_str());
+                return;
+            }
+            // get output
+            std::vector<std::shared_ptr<ObjectInfo> > body_list;
+            if (sdk_output && dynamic_cast<BlazePoseLandmarkOutput *>(sdk_output.get())) {
+                auto body_output = dynamic_cast<BlazePoseLandmarkOutput *>(sdk_output.get());
+                for (auto item : body_output->body_list) {
+                    auto body = std::make_shared<BlazePoseInfo>();
+                    for(const auto& kp3d: item.key_points_3d) {
+                        item.key_points.push_back(std::make_pair(std::get<0>(kp3d), std::get<1>(kp3d)));
+                    }
+                    *body = item;
+                    body_list.push_back(body);
+                }
+            }
+            for(const auto& body : body_list) {
+                const auto& kp2d_list = body->key_points;
+                for(const auto&xy : kp2d_list) {
+                    //printf("(%.2f, %.2f)\n", xy.first, xy.second);
+                    TNN_NS::Point(image_data.get(), image_orig_height, image_orig_width, xy.first, xy.second, 1.0);
+                }
+            }
+            UIImage* output_image = utility::UIImageWithDataRGBA(image_data.get(), image_orig_height, image_orig_width);
+            //save output image
+#if TARGET_IPHONE_SIMULATOR
+            /*
+            // save image on simulator
+            NSString *out_name = [[img_path lastPathComponent] stringByReplacingOccurrencesOfString: @".jpg" withString:@"_out.jpg"];
+            const std::string save_dir = "/Users/devandong/Desktop/blazepose/";
+            std::string save_path = save_dir+string([out_name UTF8String]);
+            NSString *path = [NSString stringWithCString:save_path.c_str()
+                                                encoding:[NSString defaultCStringEncoding]];
+            [UIImageJPEGRepresentation(output_image, 1.0) writeToFile:path atomically:YES];
+             */
+            // save key points in text file
+            NSString *out_name = [[img_path lastPathComponent] stringByReplacingOccurrencesOfString: @".jpg" withString:@".txt"];
+            const std::string save_dir = "/Users/devandong/Desktop/blazepose/";
+            std::string save_path = save_dir+string([out_name UTF8String]);
+            
+            std::ofstream outFile(save_path);
+            assert(outFile && outFile.good());
+            const auto& kp2d_list = body_list[0]->key_points;
+            for(const auto&xy : kp2d_list) {
+                //printf("(%.2f, %.2f)\n", xy.first, xy.second);
+                outFile << xy.first << "," << xy.second << std::endl;
+            }
+            outFile.flush();
+            outFile.close();
+#else
+            // write to album on real device
+            //UIImageWriteToSavedPhotosAlbum(output_image, nil, nil, nil);
 #endif
         }
     }
