@@ -487,6 +487,8 @@ lint/tmp/
 
 #model
 model/
+benchmark_model/
+benchmark_model2/
 # opencl generated code
 opencl_program.cc
 
