@@ -246,6 +246,9 @@ void Rectangle(void *data_rgba, int image_height, int image_width,
 
 void Point(void *data_rgba, int image_height, int image_width,
            int x, int y, float z, float scale_x = 1.0, float scale_y = 1.0);
+
+void Circle(void *data_rgba, int image_height, int image_width, int x, int y, float z,
+            int radius, float scale_x=1.0, float scale_y=1.0);
 }  // namespace TNN_NS
 
 #endif // TNN_EXAMPLES_BASE_TNN_SDK_SAMPLE_H_

@@ -308,12 +308,8 @@ API_AVAILABLE(ios(10.0)){
                                                   _textureCache,
                                                   imageBuffer,
                                                   nil,
-<<<<<<< HEAD
-                                                  MTLPixelFormatBGRA8Unorm,
-=======
                                                   //MTLPixelFormatBGRA8Unorm,
                                                   MTLPixelFormatRGBA8Unorm,
->>>>>>> origin/feature_demo_blazepose
                                                   width,
                                                   height,
                                                   0,

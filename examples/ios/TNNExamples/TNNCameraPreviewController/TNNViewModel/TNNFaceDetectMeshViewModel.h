@@ -14,11 +14,7 @@
 
 #import <Foundation/Foundation.h>
 #import "TNNViewModel.h"
-<<<<<<< HEAD
-#import "TNNFPSCounter.h"
-=======
 #import "tnn_fps_counter.h"
->>>>>>> origin/feature_demo_blazepose
 
 #import "UIImage+Utility.h"
 

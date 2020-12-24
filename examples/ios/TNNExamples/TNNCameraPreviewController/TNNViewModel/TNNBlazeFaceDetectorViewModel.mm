@@ -13,11 +13,7 @@
 // specific language governing permissions and limitations under the License.
 
 #import "TNNBlazeFaceDetectorViewModel.h"
-<<<<<<< HEAD
-#import "BlazeFaceDetector.h"
-=======
 #import "blazeface_detector.h"
->>>>>>> origin/feature_demo_blazepose
 
 using namespace std;
 
@@ -27,11 +23,7 @@ using namespace std;
     Status status = TNN_OK;
     
     // check release mode at Product->Scheme when running
-<<<<<<< HEAD
-    //运行时请在Product->Scheme中确认意见调整到release模式
-=======
     //运行时请在Product->Scheme中确认已经调整到release模式
->>>>>>> origin/feature_demo_blazepose
 
     // Get metallib path from app bundle
     // PS：A script(Build Phases -> Run Script) is added to copy the metallib
@@ -42,17 +34,11 @@ using namespace std;
                                                           ofType:nil];
     auto proto_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface.tnnproto"
                                                           ofType:nil];
-<<<<<<< HEAD
-    if (model_path.length <= 0 || proto_path.length <= 0) {
-        status = Status(TNNERR_NET_ERR, "Error: proto or model path is invalid");
-        NSLog(@"Error: proto or model path is invalid");
-=======
     auto anchor_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface_anchors.txt"
                                                           ofType:nil];
     if (model_path.length <= 0 || proto_path.length <= 0 || anchor_path.length <= 0) {
         status = Status(TNNERR_NET_ERR, "Error: proto or model or anchor path is invalid");
         NSLog(@"Error: proto or model or anchor path is invalid");
->>>>>>> origin/feature_demo_blazepose
         return status;
     }
 
@@ -82,11 +68,7 @@ using namespace std;
         //min_suppression_thresh
         option->min_suppression_threshold = 0.3;
         //predefined anchor file path
-<<<<<<< HEAD
-        option->anchor_path = string([[[NSBundle mainBundle] pathForResource:@"blazeface_anchors.txt" ofType:nil] UTF8String]);
-=======
         option->anchor_path = string(anchor_path.UTF8String);
->>>>>>> origin/feature_demo_blazepose
     }
     
     auto predictor = std::make_shared<BlazeFaceDetector>();

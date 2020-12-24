@@ -7,10 +7,7 @@
 @property (nonatomic, strong) CATextLayer *textLayer;
 
 @property (nonatomic, strong) NSArray<CAShapeLayer *> *markLayers;
-<<<<<<< HEAD
-=======
 @property (nonatomic, strong) NSArray<CAShapeLayer *> *lineLayers;
->>>>>>> origin/feature_demo_blazepose
 @end
 
 @implementation TNNBoundingBox
@@ -38,10 +35,7 @@
         _textLayer.alignmentMode = kCAAlignmentCenter;
         
         _markLayers = [NSArray array];
-<<<<<<< HEAD
-=======
         _lineLayers = [NSArray array];
->>>>>>> origin/feature_demo_blazepose
     }
     return self;
 }
@@ -54,14 +48,11 @@
     for (CAShapeLayer * item in markLayers) {
         [layer addSublayer:item];
     }
-<<<<<<< HEAD
-=======
     
     auto lineLayers = _lineLayers;
     for (CAShapeLayer * item in lineLayers) {
         [layer addSublayer:item];
     }
->>>>>>> origin/feature_demo_blazepose
 }
 
 -(void)removeFromSuperLayer {
@@ -72,14 +63,11 @@
     for (CAShapeLayer * item in markLayers) {
         [item removeFromSuperlayer];
     }
-<<<<<<< HEAD
-=======
     
     auto lineLayers = _lineLayers;
     for (CAShapeLayer * item in lineLayers) {
         [item removeFromSuperlayer];
     }
->>>>>>> origin/feature_demo_blazepose
 }
 
 - (void)showText:(NSString *)text withColor:(UIColor *)color atFrame:(CGRect)frame {
@@ -109,12 +97,8 @@
     [CATransaction setDisableActions:NO];
 }
 
-<<<<<<< HEAD
-- (void)showMarkAtPoints:(std::vector<std::pair<float, float>>)points withColor:(UIColor *)color {
-=======
 - (void)showMarkAtPoints:(std::vector<std::pair<float, float>>)points withColor:(UIColor *)color
                   circle:(BOOL)circle {
->>>>>>> origin/feature_demo_blazepose
     [CATransaction setDisableActions:YES];
     
     NSMutableArray<CAShapeLayer *> *newMarkLayers = [NSMutableArray arrayWithArray:_markLayers];
@@ -123,11 +107,8 @@
     for (auto i=_markLayers.count; i<points.size(); i++) {
         auto boxLayer = [[CAShapeLayer alloc] init];
         boxLayer.fillColor = [UIColor clearColor].CGColor;
-<<<<<<< HEAD
-=======
         if (circle == YES)
             boxLayer.fillColor = color.CGColor;
->>>>>>> origin/feature_demo_blazepose
         boxLayer.lineWidth = 1;
         boxLayer.hidden = YES;
         
@@ -145,12 +126,6 @@
         if (i < points.size()) {
             auto pt = points[i];
             auto path = [UIBezierPath bezierPath];
-<<<<<<< HEAD
-            [path moveToPoint:CGPointMake(pt.first-2, pt.second)];
-            [path addLineToPoint:CGPointMake(pt.first+2, pt.second)];
-            [path moveToPoint:CGPointMake(pt.first, pt.second-2)];
-            [path addLineToPoint:CGPointMake(pt.first, pt.second+2)];
-=======
             if (circle == NO) {
                 [path moveToPoint:CGPointMake(pt.first-2, pt.second)];
                 [path addLineToPoint:CGPointMake(pt.first+2, pt.second)];
@@ -160,7 +135,6 @@
                 CGPoint center = CGPointMake(pt.first, pt.second);
                 [path addArcWithCenter:center radius:2 startAngle:0 endAngle:2 * M_PI clockwise:YES];
             }
->>>>>>> origin/feature_demo_blazepose
             [path closePath];
             
             layer.path = path.CGPath;
@@ -175,8 +149,6 @@
     [CATransaction setDisableActions:NO];
 }
 
-<<<<<<< HEAD
-=======
 - (void)showLines:(std::vector<std::pair<float, float>>)points lines:(std::vector<std::pair<int, int>>)lines
         withColor:(UIColor *)color {
     [CATransaction setDisableActions:YES];
@@ -232,7 +204,6 @@
     [CATransaction setDisableActions:NO];
 }
 
->>>>>>> origin/feature_demo_blazepose
 - (void)hide {
     [CATransaction setDisableActions:YES];
     
@@ -244,14 +215,11 @@
         item.hidden = YES;
     }
     
-<<<<<<< HEAD
-=======
     auto lineLayers = _lineLayers;
     for(CAShapeLayer * item in lineLayers) {
         item.hidden = YES;
     }
     
->>>>>>> origin/feature_demo_blazepose
     [CATransaction setDisableActions:NO];
 }
 @end

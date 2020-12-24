@@ -12,13 +12,8 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-<<<<<<< HEAD
-#import <Foundation/Foundation.h>
-#import "TNNSDKSample.h"
-=======
 #import <UIKit/UIKit.h>
 #import "tnn_sdk_sample.h"
->>>>>>> origin/feature_demo_blazepose
 
 using namespace::TNN_NS;
 
@@ -27,23 +22,15 @@ using namespace::TNN_NS;
 
 @property (nonatomic, strong) NSString *title;
 @property (nonatomic, assign) bool preferFrontCamera;
-<<<<<<< HEAD
-
-=======
 @property (nonatomic, assign) bool preferGPU;
->>>>>>> origin/feature_demo_blazepose
 -(Status)loadNeuralNetworkModel:(TNNComputeUnits)units;
 
 //Object Detection
 -(std::vector<std::shared_ptr<ObjectInfo> >)getObjectList:(std::shared_ptr<TNNSDKOutput>)output;
-<<<<<<< HEAD
--(NSString*)labelForObject:(std::shared_ptr<ObjectInfo>)object;
-=======
 -(ImageInfo)getImage:(std::shared_ptr<TNNSDKOutput>)sdk_output;
 -(NSString*)labelForObject:(std::shared_ptr<ObjectInfo>)object;
 
 //Custom UI control
 - (void)setupCustomView:(UIView *)view
            layoutHeight:(NSLayoutConstraint *)viewLayoutHeight;
->>>>>>> origin/feature_demo_blazepose
 @end

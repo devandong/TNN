@@ -23,3 +23,7 @@
 
 
 - (void)showSDKOutput:(std::shared_ptr<TNNSDKOutput>)output
+  withOriginImageSize:(CGSize)size
+           withStatus:(Status)status;
+
+@end

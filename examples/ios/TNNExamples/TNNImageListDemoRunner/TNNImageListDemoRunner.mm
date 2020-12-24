@@ -13,10 +13,10 @@
 // specific language governing permissions and limitations under the License.
 
 #import "TNNImageListDemoRunner.h"
-#import "YoutuFaceAlign.h"
-#import "BlazeFaceDetector.h"
-#import "ObjectDetectorYolo.h"
-#import "UltraFaceDetector.h"
+#import "youtu_face_align.h"
+#import "blazeface_detector.h"
+#import "object_detector_yolo.h"
+#import "ultra_face_detector.h"
 #import "skeleton_detector.h"
 #import "UIImage+Utility.h"
 #import <Metal/Metal.h>
@@ -1007,20 +1007,17 @@ using namespace TNN_NS;
                 return;
             }
             
-            std::vector<SkeletonInfo> skeleton_info;
+            SkeletonInfo skeleton_info;
             if (sdk_output && dynamic_cast<SkeletonDetectorOutput *>(sdk_output.get())) {
                 auto skeleton_output = dynamic_cast<SkeletonDetectorOutput *>(sdk_output.get());
-                skeleton_info = skeleton_output->keypoint_list;
+                skeleton_info = skeleton_output->keypoints;
             }
             
-            for (int i = 0; i < skeleton_info.size(); i++) {
-                auto skeleton = skeleton_info[i];
-                //devan: us gravity 2 here will  cause face beging higher
-                //auto skeleton_orig = skeleton.AdjustToViewSize(image_orig_height, image_orig_width, 0);
-                int x = static_cast<int>(skeleton.key_points[0].first);
-                int y = static_cast<int>(skeleton.key_points[0].second);
-                Circle(image_data.get(), image_orig_height, image_orig_width, x, y, 1.0f, 3);
-            }
+            //devan: us gravity 2 here will  cause face beging higher
+            //auto skeleton_orig = skeleton.AdjustToViewSize(image_orig_height, image_orig_width, 0);
+            int x = static_cast<int>(skeleton_info.key_points[0].first);
+            int y = static_cast<int>(skeleton_info.key_points[0].second);
+            Circle(image_data.get(), image_orig_height, image_orig_width, x, y, 1.0f, 3);
             
             UIImage *output_image = utility::UIImageWithDataRGBA((void *)image_data.get(), image_orig_height, image_orig_width);
             //save output image

@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<<<<<<< HEAD
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.3" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="1C3-Qb-WYm">
-    <device id="retina5_9" orientation="portrait" appearance="light"/>
-    <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
-=======
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="1C3-Qb-WYm">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
->>>>>>> origin/feature_demo_blazepose
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -20,20 +12,6 @@
         <!--TNNImageListDemoRunner-->
         <scene sceneID="W3c-4Z-HUS">
             <objects>
-<<<<<<< HEAD
-                <viewController storyboardIdentifier="TNNImageListDemoRunner" id="8dj-aO-8mp" userLabel="TNNImageListDemoRunner" customClass="TNNImageListDemoRunner" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="TDZ-rl-rTm">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AJb-7j-RD4">
-                                <rect key="frame" x="15" y="10" width="345" height="517"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" flexibleMaxY="YES"/>
-                            </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="GPU" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w5v-8d-e5c">
-                                <rect key="frame" x="46" y="718" width="30" height="17"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-=======
                 <viewController storyboardIdentifier="TNNFaceDetectorController" id="BYZ-38-t0r" customClass="TNNFaceDetectorController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
@@ -76,15 +54,10 @@
                                 <rect key="frame" x="30" y="619" width="315" height="54"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="0.5" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
->>>>>>> origin/feature_demo_blazepose
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-<<<<<<< HEAD
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="foy-mE-wNR">
-                                <rect key="frame" x="190" y="704" width="120" height="40"/>
-=======
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -186,7 +159,6 @@
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zYu-99-Ksp">
                                 <rect key="frame" x="188" y="674" width="120" height="40"/>
->>>>>>> origin/feature_demo_blazepose
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBlueColor"/>
                                 <state key="normal" title="Run">
@@ -196,26 +168,17 @@
                                     <action selector="onBtnTNNExamples:" destination="8dj-aO-8mp" eventType="touchUpInside" id="Fjf-Kb-bIV"/>
                                 </connections>
                             </button>
-<<<<<<< HEAD
-                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="SGe-GE-WWH" userLabel="SwitchGPU">
-                                <rect key="frame" x="96" y="708" width="49" height="31"/>
-=======
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u6U-Ip-bJl">
                                 <rect key="frame" x="15" y="15" width="345" height="500"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="jvR-9y-nPz">
                                 <rect key="frame" x="82" y="679" width="51" height="31"/>
->>>>>>> origin/feature_demo_blazepose
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <connections>
                                     <action selector="onSwitchChanged:" destination="8dj-aO-8mp" eventType="valueChanged" id="PbA-kc-tTl"/>
                                 </connections>
                             </switch>
-<<<<<<< HEAD
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NQs-5S-ymA" userLabel="LabelResult">
-                                <rect key="frame" x="27" y="592" width="320" height="70"/>
-=======
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="GPU" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ADi-Uz-g9m">
                                 <rect key="frame" x="30" y="685" width="35" height="17"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -226,7 +189,6 @@
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dc9-Hp-SYk">
                                 <rect key="frame" x="20" y="577" width="335" height="100"/>
->>>>>>> origin/feature_demo_blazepose
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -234,81 +196,8 @@
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
-<<<<<<< HEAD
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                        <viewLayoutGuide key="safeArea" id="PGG-dS-T8m"/>
-=======
                         <viewLayoutGuide key="safeArea" id="XkY-ji-3ZQ"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
->>>>>>> origin/feature_demo_blazepose
-                    </view>
-                    <navigationItem key="navigationItem" id="ek6-Ro-1K3">
-                        <barButtonItem key="rightBarButtonItem" systemItem="compose" id="NMO-Li-u3z" userLabel="Compose">
-                            <connections>
-                                <segue destination="jDT-gM-iHE" kind="show" id="0f6-Kd-cf5"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                    <connections>
-                        <outlet property="btnExamples" destination="foy-mE-wNR" id="UiM-kl-ODc"/>
-                        <outlet property="imageView" destination="AJb-7j-RD4" id="iiy-y5-eSJ"/>
-                        <outlet property="labelGPU" destination="w5v-8d-e5c" id="Wll-Zn-wMF"/>
-                        <outlet property="labelResult" destination="NQs-5S-ymA" id="FNn-Yq-w58"/>
-                        <outlet property="switchGPU" destination="SGe-GE-WWH" id="Uk0-0A-d1M"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="o1t-4f-8cK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="356" y="1523.3883058470765"/>
-        </scene>
-        <!--TNNYoutuFaceAlignController-->
-        <scene sceneID="W3c-4Z-HUS">
-            <objects>
-                <viewController storyboardIdentifier="TNNYoutuFaceAlignController" id="8dj-aO-8mp" userLabel="TNNYoutuFaceAlignController" customClass="TNNYoutuFaceAlignController" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="TDZ-rl-rTm">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="758"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AJb-7j-RD4">
-                                <rect key="frame" x="15" y="10" width="345" height="483"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" flexibleMaxY="YES"/>
-                            </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="GPU" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="w5v-8d-e5c">
-                                <rect key="frame" x="46" y="664" width="30" height="17"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="foy-mE-wNR">
-                                <rect key="frame" x="190" y="650" width="120" height="40"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                <color key="backgroundColor" systemColor="systemBlueColor"/>
-                                <state key="normal" title="Run">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                </state>
-                                <connections>
-                                    <action selector="onBtnTNNExamples:" destination="8dj-aO-8mp" eventType="touchUpInside" id="Fjf-Kb-bIV"/>
-                                </connections>
-                            </button>
-                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="SGe-GE-WWH" userLabel="SwitchGPU">
-                                <rect key="frame" x="96" y="654" width="49" height="31"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <connections>
-                                    <action selector="onSwitchChanged:" destination="8dj-aO-8mp" eventType="valueChanged" id="PbA-kc-tTl"/>
-                                </connections>
-                            </switch>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NQs-5S-ymA" userLabel="LabelResult">
-                                <rect key="frame" x="27" y="538" width="320" height="70"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="PGG-dS-T8m"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" id="ek6-Ro-1K3">
                         <barButtonItem key="rightBarButtonItem" systemItem="compose" id="NMO-Li-u3z" userLabel="Compose">
@@ -405,47 +294,6 @@
         <scene sceneID="1He-D9-9al">
             <objects>
                 <tableViewController id="jDT-gM-iHE" customClass="TNNExamplesListController" sceneMemberID="viewController">
-<<<<<<< HEAD
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="plain" separatorStyle="default" rowHeight="80" estimatedRowHeight="80" sectionHeaderHeight="-1" sectionFooterHeight="-1" id="Khu-jM-gfo">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                        <sections>
-                            <tableViewSection id="iLb-2V-kb6">
-                                <cells>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" rowHeight="80" id="le7-J5-v8e">
-                                        <rect key="frame" x="0.0" y="28" width="375" height="80"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="le7-J5-v8e" id="6h1-qU-hGx">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="80"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="测试demo" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1p0-ip-NzO" userLabel="解码图像">
-                                                    <rect key="frame" x="21" y="15" width="94" height="21"/>
-                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
-                                                    <nil key="textColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="图像序列输入" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aql-MP-i17" userLabel="图像序列输入">
-                                                    <rect key="frame" x="20" y="43.666666666666664" width="104" height="20.999999999999993"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <nil key="textColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstItem="aql-MP-i17" firstAttribute="leading" secondItem="6h1-qU-hGx" secondAttribute="leading" constant="20" id="0lE-Xq-UZD"/>
-                                                <constraint firstItem="1p0-ip-NzO" firstAttribute="top" secondItem="6h1-qU-hGx" secondAttribute="top" constant="15" id="BDf-Co-8Jk"/>
-                                                <constraint firstItem="1p0-ip-NzO" firstAttribute="leading" secondItem="6h1-qU-hGx" secondAttribute="leading" constant="20" id="M0r-8k-Pud"/>
-                                                <constraint firstItem="aql-MP-i17" firstAttribute="top" secondItem="1p0-ip-NzO" secondAttribute="bottom" constant="7.5" id="QC1-W1-sl4"/>
-                                                <constraint firstAttribute="bottom" secondItem="aql-MP-i17" secondAttribute="bottom" priority="250" constant="15.5" id="lal-gR-2or"/>
-                                            </constraints>
-                                        </tableViewCellContentView>
-                                    </tableViewCell>
-                                </cells>
-                            </tableViewSection>
-                        </sections>
-=======
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="80" estimatedRowHeight="80" sectionHeaderHeight="-1" sectionFooterHeight="-1" id="Khu-jM-gfo">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="758"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -486,7 +334,6 @@
                             </tableViewCell>
                         </prototypes>
                         <sections/>
->>>>>>> origin/feature_demo_blazepose
                         <connections>
                             <outlet property="dataSource" destination="jDT-gM-iHE" id="ggX-Ye-BF7"/>
                             <outlet property="delegate" destination="jDT-gM-iHE" id="NXu-H3-MJc"/>
@@ -494,8 +341,6 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Model List" id="3h5-ew-iZu"/>
                     <connections>
-<<<<<<< HEAD
-=======
                         <segue destination="5Zr-9o-llY" kind="show" id="Mjh-EY-zsL"/>
                         <segue destination="sgv-XJ-oS6" kind="show" id="K4E-B9-D8z"/>
                         <segue destination="AwB-4D-ExP" kind="show" id="gjf-d3-x5D"/>
@@ -504,7 +349,6 @@
                         <segue destination="aqD-Jk-Yfl" kind="show" id="uBb-25-v2q"/>
                         <segue destination="X5Q-FQ-x2r" kind="show" id="h50-uG-JzL"/>
                         <segue destination="Pzy-Q2-Mw4" kind="show" id="r4k-fv-Y5N"/>
->>>>>>> origin/feature_demo_blazepose
                         <segue destination="8dj-aO-8mp" kind="show" id="QzD-lh-ws0"/>
                     </connections>
                 </tableViewController>
@@ -529,12 +373,6 @@
             </objects>
             <point key="canvasLocation" x="-354" y="27"/>
         </scene>
-<<<<<<< HEAD
-    </scenes>
-    <inferredMetricsTieBreakers>
-        <segue reference="dMd-lu-AIk"/>
-    </inferredMetricsTieBreakers>
-=======
         <!--TNNCameraPreviewController-->
         <scene sceneID="WtO-vk-RGe">
             <objects>
@@ -979,5 +817,4 @@
             <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
->>>>>>> origin/feature_demo_blazepose
 </document>

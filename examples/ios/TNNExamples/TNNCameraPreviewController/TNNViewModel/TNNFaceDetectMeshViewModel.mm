@@ -13,15 +13,9 @@
 // specific language governing permissions and limitations under the License.
 
 #import "TNNFaceDetectMeshViewModel.h"
-<<<<<<< HEAD
-#import "FaceDetectMesh.h"
-#import "Facemesh.h"
-#import "BlazeFaceDetector.h"
-=======
 #import "face_detect_mesh.h"
 #import "face_mesh.h"
 #import "blazeface_detector.h"
->>>>>>> origin/feature_demo_blazepose
 #import "UIImage+Utility.h"
 
 #import <Metal/Metal.h>
@@ -39,15 +33,10 @@ using namespace std;
                                                       ofType:nil];
     auto proto_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface.tnnproto"
                                                       ofType:nil];
-<<<<<<< HEAD
-    if (proto_path.length <= 0 || model_path.length <= 0) {
-        NSLog(@"Error: proto or model path is invalid");
-=======
     auto anchor_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface_anchors.txt"
                                                           ofType:nil];
     if (proto_path.length <= 0 || model_path.length <= 0 || anchor_path.length <= 0) {
         NSLog(@"Error: proto or model or anchor path is invalid");
->>>>>>> origin/feature_demo_blazepose
         return predictor;
     }
 
@@ -78,11 +67,7 @@ using namespace std;
         //min_suppression_thresh
         option->min_suppression_threshold = 0.3;
         //predefined anchor file path
-<<<<<<< HEAD
-        option->anchor_path = string([[[NSBundle mainBundle] pathForResource:@"blazeface_anchors.txt" ofType:nil] UTF8String]);
-=======
         option->anchor_path = string(anchor_path.UTF8String);
->>>>>>> origin/feature_demo_blazepose
     }
 
     predictor = std::make_shared<BlazeFaceDetector>();

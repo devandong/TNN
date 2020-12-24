@@ -13,15 +13,9 @@
 // specific language governing permissions and limitations under the License.
 
 #import "TNNFaceDetectAlignerViewModel.h"
-<<<<<<< HEAD
-#import "FaceDetectAligner.h"
-#import "YoutuFaceAlign.h"
-#import "BlazeFaceDetector.h"
-=======
 #import "face_detect_aligner.h"
 #import "youtu_face_align.h"
 #import "blazeface_detector.h"
->>>>>>> origin/feature_demo_blazepose
 #import "UIImage+Utility.h"
 
 #import <Metal/Metal.h>
@@ -39,15 +33,10 @@ using namespace std;
                                                       ofType:nil];
     auto proto_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface.tnnproto"
                                                       ofType:nil];
-<<<<<<< HEAD
-    if (proto_path.length <= 0 || model_path.length <= 0) {
-        NSLog(@"Error: proto or model path is invalid");
-=======
     auto anchor_path = [[NSBundle mainBundle] pathForResource:@"model/blazeface/blazeface_anchors.txt"
                                                           ofType:nil];
     if (proto_path.length <= 0 || model_path.length <= 0 || anchor_path.length <= 0) {
         LOGE("Error: proto or model or anchor path is invalid\n");
->>>>>>> origin/feature_demo_blazepose
         return predictor;
     }
     
@@ -56,11 +45,7 @@ using namespace std;
     NSData *data_mode    = [NSData dataWithContentsOfFile:model_path];
     string model_content = [data_mode length] > 0 ? string((const char *)[data_mode bytes], [data_mode length]) : "";
     if (proto_content.size() <= 0 || model_content.size() <= 0) {
-<<<<<<< HEAD
-        NSLog(@"Error: proto or model path is invalid");
-=======
         LOGE("Error: proto or model path is invalid\n");
->>>>>>> origin/feature_demo_blazepose
         return predictor;
     }
     //blazeface requires input with shape 128*128
@@ -82,21 +67,13 @@ using namespace std;
         //min_suppression_thresh
         option->min_suppression_threshold = 0.3;
         //predefined anchor file path
-<<<<<<< HEAD
-        option->anchor_path = string([[[NSBundle mainBundle] pathForResource:@"blazeface_anchors.txt" ofType:nil] UTF8String]);
-=======
         option->anchor_path = string(anchor_path.UTF8String);
->>>>>>> origin/feature_demo_blazepose
     }
     
     predictor = std::make_shared<BlazeFaceDetector>();
     auto status = predictor->Init(option);
     if (status != TNN_OK) {
-<<<<<<< HEAD
-        NSLog(@"Error: %s", status.description().c_str());
-=======
         LOGE("Error: %s\n", status.description().c_str());
->>>>>>> origin/feature_demo_blazepose
         return nullptr;
     }
     
@@ -109,21 +86,6 @@ using namespace std;
     auto library_path = [[NSBundle mainBundle] pathForResource:@"tnn.metallib" ofType:nil];
     NSString *model_path = nil;
     NSString *proto_path = nil;
-<<<<<<< HEAD
-    
-    if(1 == phase) {
-        model_path = [[NSBundle mainBundle] pathForResource:@"model/youtu_facealign/p1_bf16_easy.opt.tnnmodel"
-                                                     ofType:nil];
-        proto_path = [[NSBundle mainBundle] pathForResource:@"model/youtu_facealign/p1_bf16_easy_remove_vis_addsigmoid.opt.tnnproto"
-                                                     ofType:nil];
-    } else if(2 == phase) {
-        model_path = [[NSBundle mainBundle] pathForResource:@"model/youtu_facealign/p2_bf16_easy.opt.tnnmodel"
-                                                     ofType:nil];
-        proto_path = [[NSBundle mainBundle] pathForResource:@"model/youtu_facealign/p2_bf16_easy_remove_vis.opt.tnnproto"
-                                                     ofType:nil];
-    } else{
-        NSLog(@"Error: facealign model phase is invalid");
-=======
     NSString *mean_pts_path = nil;
     
     if(1 == phase) {
@@ -142,16 +104,11 @@ using namespace std;
                                                      ofType:nil];
     } else{
         LOGE("Error: facealign model phase is invalid\n");
->>>>>>> origin/feature_demo_blazepose
         return nullptr;
     }
     
     if (proto_path.length <= 0 || model_path.length <= 0) {
-<<<<<<< HEAD
-        NSLog(@"Error: proto or model path is invalid");
-=======
         LOGE("Error: proto or model path is invalid\n");
->>>>>>> origin/feature_demo_blazepose
         return predictor;
     }
     
@@ -160,11 +117,7 @@ using namespace std;
     NSData *data_mode    = [NSData dataWithContentsOfFile:model_path];
     string model_content = [data_mode length] > 0 ? string((const char *)[data_mode bytes], [data_mode length]) : "";
     if (proto_content.size() <= 0 || model_content.size() <= 0) {
-<<<<<<< HEAD
-        NSLog(@"Error: proto or model path is invalid");
-=======
         LOGE("Error: proto or model path is invalid\n");
->>>>>>> origin/feature_demo_blazepose
         return predictor;
     }
     //youtu facealign models require input with shape 128*128
@@ -189,22 +142,13 @@ using namespace std;
         //net_scale
         option->net_scale = phase == 1? 1.2 : 1.3;
         //mean pts path
-<<<<<<< HEAD
-        string mean_file_path = string([[[NSBundle mainBundle] pathForResource: phase==1? @"mean_pts_phase1.txt" : @"mean_pts_phase2.txt" ofType:nil] UTF8String]);
-        option->mean_pts_path = std::move(mean_file_path);
-=======
         option->mean_pts_path = mean_pts_path ? string(mean_pts_path.UTF8String) : "";
->>>>>>> origin/feature_demo_blazepose
     }
     
     predictor = std::make_shared<YoutuFaceAlign>();
     auto status = predictor->Init(option);
     if (status != TNN_OK) {
-<<<<<<< HEAD
-        NSLog(@"Error: %s", status.description().c_str());
-=======
         LOGE("Error: %s\n", status.description().c_str());
->>>>>>> origin/feature_demo_blazepose
         return nullptr;
     }
     
@@ -217,8 +161,6 @@ using namespace std;
     auto predictor_phase1 = [self loadYoutuFaceAlign:units :1];
     auto predictor_phase2 = [self loadYoutuFaceAlign:units :2];
     
-<<<<<<< HEAD
-=======
     if (!face_detector) {
         return Status(TNNERR_MODEL_ERR, "loadFaceDetector failed: pls make sure the face detect model is downloaded");
     }
@@ -228,7 +170,6 @@ using namespace std;
     }
     
     
->>>>>>> origin/feature_demo_blazepose
     auto predictor = std::make_shared<FaceDetectAligner>();
     status = predictor->Init({face_detector, predictor_phase1, predictor_phase2});
     

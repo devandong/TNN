@@ -1002,4 +1002,38 @@ void Point(void *data_rgba, int image_height, int image_width, int x, int y, flo
     }
 }
 
+void Circle(void *data_rgba, int image_height, int image_width, int x, int y, float z, int radius, float scale_x, float scale_y)
+{
+    auto distance = [](int x1, int y1, int x2, int y2) {
+        return std::sqrt(std::pow(std::abs(x1-x2), 2)+std::pow(std::abs(y1-y2), 2));
+    };
+
+    RGBA *image_rgba = (RGBA *)data_rgba;
+    int x_center = x * scale_x;
+    int y_center = y * scale_y;
+
+    unsigned char red = std::min(std::max(0, int(175 + z*80)), 255);
+    RGBA color = {red, 0, 0, 255};
+
+    int x_start = x_center - radius;
+    int y_start = y_center - radius;
+    int x_end   = x_center + radius;
+    int y_end   = y_center + radius;
+
+    x_start = std::min(std::max(0, x_start), image_width - 1);
+    x_end   = std::min(std::max(0, x_end), image_width - 1);
+    y_start = std::min(std::max(0, y_start), image_height - 1);
+    y_end   = std::min(std::max(0, y_end), image_height - 1);
+    x_center = std::min(std::max(0, x_center), image_width - 1);
+    y_center = std::min(std::max(0, y_center), image_height - 1);
+
+    for(int y = y_start; y<y_end; ++y) {
+        for(int x=x_start; x<x_end; ++x) {
+            if (distance(x_center, y_center, x, y) <= radius) {
+                image_rgba[y*image_width+x]  = color;
+            }
+        }
+    }
+}
+
 }  // namespace TNN_NS
